@@ -125,7 +125,11 @@ export default function Theme({
       <SafeAreaProvider>
         <GestureHandlerRootView>
           <View
-            style={{flex: 1, ...themes.base, ...themes[colorSchemeState || "light"] }}
+            style={{
+              flex: 1,
+              ...themes.base,
+              ...themes[colorSchemeState || "light"],
+            }}
           >
             {children}
           </View>
@@ -134,3 +138,7 @@ export default function Theme({
     </ThemeContext.Provider>
   );
 }
+
+class SVGElement {}
+
+globalThis.SVGElement = SVGElement as any;

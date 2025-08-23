@@ -117,10 +117,6 @@ const components = [
     description: "A toggle component for React Native applications.",
   },
   {
-    name: "toggle-group",
-    description: "A toggle group component for React Native applications.",
-  },
-  {
     name: "tooltip",
     description: "A tooltip component for React Native applications.",
   },

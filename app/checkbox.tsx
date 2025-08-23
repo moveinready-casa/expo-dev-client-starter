@@ -1,0 +1,11 @@
+import { Checkbox } from "@/components/ui/checkbox";
+import React from "react";
+import { View } from "react-native";
+
+export default function CheckboxPage() {
+  return (
+    <View className="m-auto">
+      <Checkbox />
+    </View>
+  );
+}
