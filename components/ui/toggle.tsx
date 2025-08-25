@@ -1,3 +1,4 @@
+import { AriaToggleButtonProps, useToggleButton } from "@react-aria/button";
 import React, {
   ComponentProps,
   ReactNode,
@@ -5,9 +6,8 @@ import React, {
   useRef,
   useState,
 } from "react";
-import {Platform, Pressable} from "react-native";
-import {AriaToggleButtonProps, useToggleButton} from "@react-aria/button";
-import {tv} from "tailwind-variants";
+import { Platform, Pressable } from "react-native";
+import { tv } from "tailwind-variants";
 
 /**
  * Base props for the Toggle component and the useToggle hook.
@@ -87,9 +87,10 @@ export const useToggle = ({
   const buttonRef = useRef(null);
 
   const webAriaProps = useToggleButton(
-    {...props},
+    { ...props },
     {
       isSelected: currentPressed,
+      defaultSelected: defaultPressed || false,
       setSelected: (next) => {
         if (!isControlled) {
           setInternalPressed(next);
@@ -101,7 +102,7 @@ export const useToggle = ({
         }
       },
     },
-    buttonRef,
+    buttonRef
   );
 
   const handlePress = (event: any) => {
@@ -119,15 +120,17 @@ export const useToggle = ({
   };
 
   return {
-    state: {isPressed: currentPressed},
+    state: { isPressed: currentPressed },
     props: {
       ...(Platform.OS === "web" ? webAriaProps : {}),
       ...props,
       onPress: handlePress,
       accessibilityRole: "button",
-      accessibilityState: {selected: currentPressed, disabled: !!disabled},
+      accessibilityState: { selected: currentPressed, disabled: !!disabled },
       accessible: true,
-      ...(props["aria-label"] ? {accessibilityLabel: props["aria-label"]} : {}),
+      ...(props["aria-label"]
+        ? { accessibilityLabel: props["aria-label"] }
+        : {}),
       ref: buttonRef,
     },
   };
@@ -182,7 +185,7 @@ export function Toggle({
   testID,
   ...props
 }: ToggleComponentProps) {
-  const {props: ariaProps, state} = useToggle({
+  const { props: ariaProps, state } = useToggle({
     pressed,
     defaultPressed,
     onPressedChange,
@@ -205,12 +208,12 @@ export function Toggle({
   };
 
   const renderProps =
-    testID !== undefined ? {...baseRenderProps, testID} : baseRenderProps;
+    testID !== undefined ? { ...baseRenderProps, testID } : baseRenderProps;
 
   return asChild ? (
     React.cloneElement(
       React.Children.toArray(children)[0] as React.ReactElement<any>,
-      renderProps,
+      renderProps
     )
   ) : (
     <Pressable {...renderProps}>{children}</Pressable>

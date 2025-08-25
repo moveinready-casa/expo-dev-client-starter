@@ -1,3 +1,7 @@
+import { useButton } from "@react-aria/button";
+import { useDisclosure as useAccordionAria } from "@react-aria/disclosure";
+import { useFocusRing } from "@react-aria/focus";
+import { ChevronDownIcon } from "lucide-react-native";
 import React, {
   ComponentProps,
   createContext,
@@ -7,26 +11,22 @@ import React, {
   useState,
 } from "react";
 import {
-  Pressable,
-  View,
-  Platform,
-  Text,
-  LayoutChangeEvent,
   ActivityIndicator,
+  LayoutChangeEvent,
+  Platform,
+  Pressable,
+  Text,
+  View,
 } from "react-native";
-import {useDisclosure as useAccordionAria} from "@react-aria/disclosure";
-import {useButton} from "@react-aria/button";
-import {useFocusRing} from "@react-aria/focus";
 import Reanimated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
   AnimatedProps,
   ReduceMotion,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
-import {ChevronDownIcon} from "lucide-react-native";
-import {tv} from "tailwind-variants";
-import {themes, ThemeContext} from "../theme";
+import { tv } from "tailwind-variants";
+import { ThemeContext, themes } from "../theme";
 
 /**
  * Base props for the root `Accordion` component, context, and hook.
@@ -228,7 +228,7 @@ export const useAccordion = ({
 
   const isControlled = value !== undefined;
   const [internalValue, setInternalValue] = useState<string | string[] | null>(
-    defaultValue ?? (type === "multiple" ? [] : null),
+    defaultValue ?? (type === "multiple" ? [] : null)
   );
 
   const expandedValue = isControlled ? value : internalValue;
@@ -262,8 +262,8 @@ export const useAccordionItem = ({
   state,
   props,
 }: AccordionItemProps): AccordionItemReturn => {
-  const {expandedValue, setExpandedValue} = state;
-  const {type, collapsible, loading} = props;
+  const { expandedValue, setExpandedValue } = state;
+  const { type, collapsible, loading } = props;
   const isMultiple = type === "multiple";
 
   const controlled = () => {
@@ -309,7 +309,7 @@ export const useAccordionItem = ({
   const contentRef = useRef<View>(null);
   const triggerRef = useRef<View>(null);
 
-  const {buttonProps: triggerProps, panelProps: contentProps} =
+  const { buttonProps: triggerProps, panelProps: contentProps } =
     useAccordionAria(
       {
         isDisabled: isControlled || loading || isDisabled,
@@ -322,11 +322,11 @@ export const useAccordionItem = ({
         collapse: () => updateIsExpanded(false),
         toggle: () => handlePress(),
       },
-      contentRef,
+      contentRef
     );
 
-  const {buttonProps} = useButton(triggerProps, triggerRef);
-  const {isFocusVisible, focusProps} = useFocusRing();
+  const { buttonProps } = useButton(triggerProps, triggerRef);
+  const { isFocusVisible, focusProps } = useFocusRing();
 
   return {
     componentProps: {
@@ -339,16 +339,16 @@ export const useAccordionItem = ({
       isFocusVisible,
     },
     triggerProps: {
-      ...(Platform.OS === "web" ? {...buttonProps, ...focusProps} : {}),
+      ...(Platform.OS === "web" ? { ...buttonProps, ...focusProps } : {}),
       onPress: handlePress,
       accessibilityRole: "button",
-      accessibilityState: {isExpanded},
+      accessibilityState: { isExpanded },
       accessibilityHint: isExpanded
         ? "Collapse the content"
         : "Expands the content",
     },
     contentProps: {
-      ...(Platform.OS === "web" ? {...contentProps} : {}),
+      ...(Platform.OS === "web" ? { ...contentProps } : {}),
       accessible: true,
       accessibilityElementsHidden: !isExpanded,
       accessibilityLiveRegion: "polite",
@@ -361,8 +361,15 @@ export const useAccordionItem = ({
  * @see AccordionContextValue
  */
 export const AccordionContext = createContext<AccordionContextValue | null>(
-  null,
+  null
 );
+
+/**
+ * A context wrapper containing the global state of the accordion item.
+ * @see AccordionItemContextValue
+ */
+export const AccordionItemContext =
+  createContext<AccordionItemContextValue | null>(null);
 
 /**
  * Conditional classes for the root accordion component.
@@ -400,6 +407,137 @@ export const accordion = tv({
   },
   defaultVariants: {
     variant: "shadcn",
+  },
+});
+
+/**
+ * Conditional classes for the accordion item component.
+ * @see AccordionItemComponentProps
+ */
+export const accordionItem = tv({
+  slots: {
+    base: "border-border border-b last:border-b-0",
+  },
+  variants: {
+    compact: {
+      true: {},
+    },
+    variant: {
+      shadcn: {},
+      shadow: {},
+      bordered: {},
+      splitted: {
+        base: "bg-background rounded border-none m-2 p-1",
+      },
+    },
+    loading: {
+      true: {
+        base: "animate-pulse opacity-50",
+      },
+    },
+    borderRadius: {
+      sm: {},
+      md: {},
+      lg: {},
+      xl: {},
+    },
+  },
+  compoundVariants: [
+    {
+      variant: "splitted",
+      compact: true,
+      className: "m-1",
+    },
+    {
+      variant: "splitted",
+      borderRadius: "sm",
+      className: {
+        base: "rounded-sm",
+      },
+    },
+    {
+      variant: "splitted",
+      borderRadius: "md",
+      className: {
+        base: "rounded-md",
+      },
+    },
+    {
+      variant: "splitted",
+      borderRadius: "lg",
+      className: {
+        base: "rounded-lg",
+      },
+    },
+    {
+      variant: "splitted",
+      borderRadius: "xl",
+      className: {
+        base: "rounded-xl",
+      },
+    },
+  ],
+  defaultVariants: {
+    variant: "shadcn",
+    compact: false,
+    loading: false,
+  },
+});
+
+/**
+ * Conditional classes for the accordion trigger component.
+ * It includes the following slots:
+ * - base: The base styles for the accordion trigger.
+ * - content: The content styles for the accordion trigger.
+ * - indicatorIcon: The indicator icon styles for the accordion trigger.
+ * @see AccordionTriggerProps
+ */
+export const accordionTrigger = tv({
+  slots: {
+    base: "flex flex-row items-center justify-between rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline",
+    content: "flex flex-row items-center gap-4 flex-1 text-foreground",
+    indicatorIcon:
+      "text-muted-foreground pointer-events-none size-4 shrink-0 flex justify-center items-center",
+  },
+  variants: {
+    focused: {
+      true: {
+        base: "border border-ring",
+      },
+    },
+    disabled: {
+      true: {
+        base: "pointer-events-none opacity-50",
+      },
+    },
+    controlled: {
+      true: {
+        base: "pointer-events-none",
+      },
+    },
+    compact: {
+      true: {
+        base: "py-2",
+      },
+    },
+  },
+});
+
+/**
+ * Conditional classes for the accordion content component.
+ * @see AccordionContentProps
+ */
+export const accordionContent = tv({
+  slots: {
+    base: "overflow-hidden",
+    text: "text-sm text-foreground",
+  },
+  variants: {
+    compact: {
+      true: {
+        base: "py-1",
+      },
+    },
   },
 });
 
@@ -482,7 +620,7 @@ export function Accordion({
     loading,
   });
 
-  const {base} = accordion();
+  const { base } = accordion();
   const renderProps = {
     ...AccordionProps.componentProps,
     ...props,
@@ -515,7 +653,7 @@ export function Accordion({
           {
             ...renderProps,
             className: renderProps.className,
-          },
+          }
         )
       ) : (
         <View {...renderProps}>{children}</View>
@@ -523,87 +661,6 @@ export function Accordion({
     </AccordionContext.Provider>
   );
 }
-
-/**
- * A context wrapper containing the global state of the accordion item.
- * @see AccordionItemContextValue
- */
-export const AccordionItemContext =
-  createContext<AccordionItemContextValue | null>(null);
-
-/**
- * Conditional classes for the accordion item component.
- * @see AccordionItemComponentProps
- */
-export const accordionItem = tv({
-  slots: {
-    base: "border-border border-b last:border-b-0",
-  },
-  variants: {
-    compact: {
-      true: {},
-    },
-    variant: {
-      shadcn: {},
-      shadow: {},
-      bordered: {},
-      splitted: {
-        base: "bg-background rounded border-none m-2 p-1",
-      },
-    },
-    loading: {
-      true: {
-        base: "animate-pulse opacity-50",
-      },
-    },
-    borderRadius: {
-      sm: {},
-      md: {},
-      lg: {},
-      xl: {},
-    },
-  },
-  compoundVariants: [
-    {
-      variant: "splitted",
-      compact: true,
-      className: "m-1",
-    },
-    {
-      variant: "splitted",
-      borderRadius: "sm",
-      className: {
-        base: "rounded-sm",
-      },
-    },
-    {
-      variant: "splitted",
-      borderRadius: "md",
-      className: {
-        base: "rounded-md",
-      },
-    },
-    {
-      variant: "splitted",
-      borderRadius: "lg",
-      className: {
-        base: "rounded-lg",
-      },
-    },
-    {
-      variant: "splitted",
-      borderRadius: "xl",
-      className: {
-        base: "rounded-xl",
-      },
-    },
-  ],
-  defaultVariants: {
-    variant: "shadcn",
-    compact: false,
-    loading: false,
-  },
-});
 
 /**
  * The accordion item component. This does not render anything, it is primarily used to provide context to the accordion item and set the layout.
@@ -621,7 +678,7 @@ export function AccordionItem({
   baseClassName,
   ...props
 }: AccordionItemComponentProps) {
-  const {base} = accordionItem();
+  const { base } = accordionItem();
   const accordionContext = useContext(AccordionContext);
 
   if (!accordionContext) {
@@ -678,45 +735,6 @@ export function AccordionItem({
 }
 
 /**
- * Conditional classes for the accordion trigger component.
- * It includes the following slots:
- * - base: The base styles for the accordion trigger.
- * - content: The content styles for the accordion trigger.
- * - indicatorIcon: The indicator icon styles for the accordion trigger.
- * @see AccordionTriggerProps
- */
-export const accordionTrigger = tv({
-  slots: {
-    base: "flex flex-row items-center justify-between rounded-md py-4 text-left text-sm font-medium transition-all outline-none hover:underline",
-    content: "flex flex-row items-center gap-4 flex-1 text-foreground",
-    indicatorIcon:
-      "text-muted-foreground pointer-events-none size-4 shrink-0 flex justify-center items-center",
-  },
-  variants: {
-    focused: {
-      true: {
-        base: "border border-ring",
-      },
-    },
-    disabled: {
-      true: {
-        base: "pointer-events-none opacity-50",
-      },
-    },
-    controlled: {
-      true: {
-        base: "pointer-events-none",
-      },
-    },
-    compact: {
-      true: {
-        base: "py-2",
-      },
-    },
-  },
-});
-
-/**
  * The accordion trigger component. It also container an indicator with an option to render start content.
  * @param param0 - Props to configure the behavior of the accordion trigger. @see AccordionTriggerProps
  * @returns Returns a `Pressable` which is used to toggle the content. It also container an indicator with an option to render start content.
@@ -732,8 +750,8 @@ export function AccordionTrigger({
   reanimatedProps,
   ...props
 }: AccordionTriggerProps) {
-  const {base, content, indicatorIcon} = accordionTrigger();
-  const {colorScheme} = useContext(ThemeContext);
+  const { base, content, indicatorIcon } = accordionTrigger();
+  const { colorScheme } = useContext(ThemeContext);
   const itemState = useContext(AccordionItemContext);
   const rotation = useSharedValue(0);
 
@@ -746,16 +764,16 @@ export function AccordionTrigger({
 
   const animatedIndicatorIconStyle = useAnimatedStyle(() => {
     return {
-      transform: [{rotate: `${rotation.value}deg`}],
+      transform: [{ rotate: `${rotation.value}deg` }],
     };
   });
 
   const Indicator = () => (
-    <View className={indicatorIcon({className: indicatorIconClassName})}>
+    <View className={indicatorIcon({ className: indicatorIconClassName })}>
       {typeof indicator === "function" ? (
         indicator(itemState?.state.isExpanded ?? false)
       ) : itemState?.props.loading ? (
-        <ActivityIndicator color={themes[colorScheme].foreground} />
+        <ActivityIndicator color={themes[colorScheme]["--foreground"]} />
       ) : (
         <Reanimated.View
           style={animatedIndicatorIconStyle}
@@ -779,7 +797,7 @@ export function AccordionTrigger({
 
   return asChild ? (
     <View {...baseProps}>
-      <View className={content({className: contentClassName})}>
+      <View className={content({ className: contentClassName })}>
         {React.cloneElement(
           React.Children.toArray(children)[0] as React.ReactElement<{
             className: string;
@@ -787,14 +805,14 @@ export function AccordionTrigger({
           {
             ...itemState?.triggerProps,
             ...props,
-          },
+          }
         )}
       </View>
       <Indicator />
     </View>
   ) : (
     <Pressable {...itemState?.triggerProps} {...baseProps}>
-      <Text className={content({className: contentClassName})}>
+      <Text className={content({ className: contentClassName })}>
         {startContent && <View>{startContent}</View>}
         <Text {...props}>{children}</Text>
       </Text>
@@ -802,24 +820,6 @@ export function AccordionTrigger({
     </Pressable>
   );
 }
-
-/**
- * Conditional classes for the accordion content component.
- * @see AccordionContentProps
- */
-export const accordionContent = tv({
-  slots: {
-    base: "overflow-hidden",
-    text: "text-sm text-foreground",
-  },
-  variants: {
-    compact: {
-      true: {
-        base: "py-1",
-      },
-    },
-  },
-});
 
 export function AccordionContent({
   children,
@@ -829,7 +829,7 @@ export function AccordionContent({
   textClassName,
   ...props
 }: AccordionContentProps) {
-  const {base, text} = accordionContent();
+  const { base, text } = accordionContent();
 
   const itemState = useContext(AccordionItemContext);
   const height = useSharedValue(0);
@@ -840,7 +840,7 @@ export function AccordionContent({
     if (hasInitialized && contentHeight > 0) {
       height.value = withTiming(
         itemState?.state.isExpanded ? contentHeight : 0,
-        {duration: 300, reduceMotion: ReduceMotion.System},
+        { duration: 300, reduceMotion: ReduceMotion.System }
       );
     }
   }, [itemState?.state.isExpanded, contentHeight, hasInitialized]);
@@ -853,7 +853,7 @@ export function AccordionContent({
   });
 
   const handleLayout = (event: LayoutChangeEvent) => {
-    const {height: measuredHeight} = event.nativeEvent.layout;
+    const { height: measuredHeight } = event.nativeEvent.layout;
     if (measuredHeight > 0 && !hasInitialized) {
       setContentHeight(measuredHeight);
       setHasInitialized(true);
@@ -868,7 +868,7 @@ export function AccordionContent({
         if (React.isValidElement(child)) {
           return React.cloneElement(child, {
             ...itemState?.contentProps,
-            className: base({compact: itemState?.props.compact}),
+            className: base({ compact: itemState?.props.compact }),
             ...props,
           });
         }
@@ -876,7 +876,7 @@ export function AccordionContent({
       })
     ) : (
       <View {...itemState?.contentProps}>
-        <Text {...props} className={text({className: textClassName})}>
+        <Text {...props} className={text({ className: textClassName })}>
           {children}
         </Text>
       </View>
@@ -885,7 +885,7 @@ export function AccordionContent({
   return (
     <>
       <View
-        style={{position: "absolute", opacity: 0, zIndex: -1}}
+        style={{ position: "absolute", opacity: 0, zIndex: -1 }}
         onLayout={handleLayout}
         className={base({
           compact: itemState?.props.compact,

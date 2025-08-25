@@ -352,7 +352,6 @@ export function Input({
     showClear: state.showClear,
     required,
   });
-  const {colorScheme} = useContext(ThemeContext);
 
   return (
     <View
@@ -365,7 +364,6 @@ export function Input({
         {...inputProps}
         {...textInputProps}
         testID="input-field"
-        style={{color: colorScheme === "dark" ? "#fafafa" : "#0a0a0a"}}
         className={input({
           className: inputClassName || textInputProps.className,
         })}

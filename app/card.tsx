@@ -12,7 +12,7 @@ import { View } from "react-native";
 
 export default function CardPage() {
   return (
-    <View className="m-auto">
+    <View className="m-auto p-4">
       <Card>
         <CardHeader>
           <CardTitle>Card Title</CardTitle>

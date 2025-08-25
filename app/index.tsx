@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/card";
 import components from "@/constants/components";
 import { Link } from "expo-router";
-import { ScrollView } from "react-native";
+import { ScrollView, Text } from "react-native";
 
 export default function Index() {
   return (

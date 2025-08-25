@@ -14,7 +14,7 @@ export default function TooltipPage() {
           <Tooltip>
             <TooltipTrigger>Hover</TooltipTrigger>
             <TooltipContent>
-              <Text className="text-foreground">Add to library</Text>
+              Add to library
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

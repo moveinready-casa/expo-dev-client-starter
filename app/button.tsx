@@ -5,7 +5,7 @@ import { View } from "react-native";
 export default function ButtonPage() {
   return (
     <View className="m-auto">
-      <Button>Button</Button>
+      <Button size="md">Button</Button>
     </View>
   );
 }

@@ -1,6 +1,12 @@
-import {AriaButtonProps, useButton as useAriaButton} from "@react-aria/button";
-import {AriaDialogProps, useDialog as useDialogAria} from "@react-aria/dialog";
-import {useFocusRing} from "@react-aria/focus";
+import {
+  AriaButtonProps,
+  useButton as useAriaButton,
+} from "@react-aria/button";
+import {
+  AriaDialogProps,
+  useDialog as useDialogAria,
+} from "@react-aria/dialog";
+import { useFocusRing } from "@react-aria/focus";
 import React, {
   ComponentProps,
   createContext,
@@ -17,9 +23,9 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import Reanimated, {FadeIn, FadeOut} from "react-native-reanimated";
-import {tv} from "tailwind-variants";
-import {button as buttonTV} from "./button";
+import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { tv } from "tailwind-variants";
+import { button as buttonTV } from "./button";
 
 /**
  * Base props for the root `AlertDialog` component, context, and hook.
@@ -65,10 +71,10 @@ export type AlertDialogContentProps = {
   onCloseAutoFocus?: (e: React.FocusEvent<Element, Element>) => void;
   onEscapeKeyDown?: (e: React.KeyboardEvent<Element>) => void;
   onPointerDownOutside?: (
-    e: GestureResponderEvent | React.FocusEvent<Element, Element>,
+    e: GestureResponderEvent | React.FocusEvent<Element, Element>
   ) => void;
   onInteractOutside?: (
-    e: GestureResponderEvent | React.FocusEvent<Element, Element>,
+    e: GestureResponderEvent | React.FocusEvent<Element, Element>
   ) => void;
   forceMount?: boolean;
 } & Partial<AlertDialogReturn> &
@@ -233,7 +239,7 @@ export type AlertDialogActionComponentProps = {
     | "secondary"
     | "ghost"
     | "link";
-  size?: "default" | "sm" | "lg" | "icon";
+  size?: "md" | "sm" | "lg" | "icon";
   borderRadius?: "none" | "sm" | "md" | "lg" | "xl";
 } & ComponentProps<typeof Pressable>;
 
@@ -253,7 +259,7 @@ export type AlertDialogCancelComponentProps = AlertDialogActionComponentProps;
 export type DialogActionHookProps = {
   state?: AlertDialogReturn["state"];
   forceMount?: boolean;
-} & Omit<AriaButtonProps, "isDisabled"> & {disabled?: boolean};
+} & Omit<AriaButtonProps, "isDisabled"> & { disabled?: boolean };
 
 /**
  * Return type for the `useDialogAction` hook.
@@ -308,7 +314,10 @@ export const useAlertDialogTrigger = ({
   }
 
   const ref = useRef<HTMLButtonElement>(null);
-  const {buttonProps} = useAriaButton({...props, isDisabled: disabled}, ref);
+  const { buttonProps } = useAriaButton(
+    { ...props, isDisabled: disabled },
+    ref
+  );
 
   return {
     componentProps: {
@@ -366,7 +375,7 @@ export const useAlertDialogContent = ({
   }
 
   const dialogRef = useRef<View | HTMLDivElement>(null);
-  const dialogAria = useDialogAria({...props}, dialogRef);
+  const dialogAria = useDialogAria({ ...props }, dialogRef);
 
   return {
     componentProps: {
@@ -374,21 +383,21 @@ export const useAlertDialogContent = ({
       ref: dialogRef,
       accessible: true,
       focusable: true,
-      onFocus: (e) => {
+      onFocus: (e: React.FocusEvent<Element, Element>) => {
         onOpenAutoFocus?.(e);
         onInteractOutside?.(e);
       },
-      onBlur: (e) => {
+      onBlur: (e: React.FocusEvent<Element, Element>) => {
         onCloseAutoFocus?.(e);
       },
       accessibilityRole: "dialog",
       accessibilityLiveRegion: "polite",
       accessibilityViewIsModal: modal,
-      onKeyDown: (e) => {
+      onKeyDown: (e: React.KeyboardEvent<Element>) => {
         if (forceMount) return;
-        if ((e as any).key === "Escape") {
+        if (e.key === "Escape") {
           state.setIsOpen(false);
-          onEscapeKeyDown?.(e as any);
+          onEscapeKeyDown?.(e);
         }
       },
       onPress: (e: GestureResponderEvent) => {
@@ -420,12 +429,15 @@ export const useDialogAction = ({
   }
 
   const ref = useRef<HTMLButtonElement>(null);
-  const {buttonProps} = useAriaButton({...props, isDisabled: disabled}, ref);
-  const {focusProps} = useFocusRing();
+  const { buttonProps } = useAriaButton(
+    { ...props, isDisabled: disabled },
+    ref
+  );
+  const { focusProps } = useFocusRing();
 
   return {
     componentProps: {
-      ...(Platform.OS === "web" ? {...buttonProps, ...focusProps} : {}),
+      ...(Platform.OS === "web" ? { ...buttonProps, ...focusProps } : {}),
       accessibilityRole: "button",
       onPress: (e: any) => {
         onPress?.(e as any);
@@ -441,9 +453,9 @@ export const useDialogAction = ({
  * @see AlertDialogComponentProps
  */
 export const AlertDialogContext = createContext<
-  AlertDialogReturn & {props: Partial<AlertDialogComponentProps>}
+  AlertDialogReturn & { props: Partial<AlertDialogComponentProps> }
 >({
-  state: {isOpen: false, setIsOpen: () => {}},
+  state: { isOpen: false, setIsOpen: () => {} },
   props: {},
 });
 
@@ -478,11 +490,11 @@ export const alertDialogContent = tv({
   },
   variants: {
     borderRadius: {
-      none: {base: "rounded-none"},
-      sm: {base: "rounded-sm"},
-      md: {base: "rounded-md"},
-      lg: {base: "rounded-lg"},
-      xl: {base: "rounded-xl"},
+      none: { base: "rounded-none" },
+      sm: { base: "rounded-sm" },
+      md: { base: "rounded-md" },
+      lg: { base: "rounded-lg" },
+      xl: { base: "rounded-xl" },
     },
   },
 });
@@ -555,7 +567,7 @@ export function AlertDialog({
     onOpenChange: props.onOpenChange,
   });
   return (
-    <AlertDialogContext.Provider value={{...hook, props}}>
+    <AlertDialogContext.Provider value={{ ...hook, props }}>
       {children}
     </AlertDialogContext.Provider>
   );
@@ -572,7 +584,7 @@ export function AlertDialogTrigger({
   ...props
 }: AlertDialogTriggerProps) {
   const dialog = useContext(AlertDialogContext);
-  const {componentProps} = useAlertDialogTrigger({...dialog, ...props});
+  const { componentProps } = useAlertDialogTrigger({ ...dialog, ...props });
 
   return asChild ? (
     React.cloneElement(
@@ -581,7 +593,7 @@ export function AlertDialogTrigger({
       }>,
       {
         ...(componentProps as ComponentProps<typeof Pressable>),
-      },
+      }
     )
   ) : (
     <Pressable {...(componentProps as ComponentProps<typeof Pressable>)}>
@@ -612,8 +624,8 @@ export function AlertDialogOverlay({
   baseClassName,
   ...props
 }: AlertDialogOverlayComponentProps) {
-  const {state, props: rootProps} = useContext(AlertDialogContext);
-  const {overlayProps} = useAlertDialogOverlay({state});
+  const { state, props: rootProps } = useContext(AlertDialogContext);
+  const { overlayProps } = useAlertDialogOverlay({ state });
 
   if (rootProps.modal === false) {
     return;
@@ -629,7 +641,7 @@ export function AlertDialogOverlay({
           className: alertDialogOverlay({
             className: baseClassName || props.className,
           }),
-        },
+        }
       )
     : state.isOpen && (
         <Reanimated.View entering={FadeIn} exiting={FadeOut}>
@@ -658,9 +670,9 @@ export function AlertDialogContent({
   baseClassName,
   ...props
 }: AlertDialogContentComponentProps) {
-  const {state} = useContext(AlertDialogContext);
-  const contextProps = useAlertDialogContent({...props, state, forceMount});
-  const {base} = alertDialogContent({borderRadius});
+  const { state } = useContext(AlertDialogContext);
+  const contextProps = useAlertDialogContent({ ...props, state, forceMount });
+  const { base } = alertDialogContent({ borderRadius });
   const shouldRender = state.isOpen || !!forceMount;
 
   return (
@@ -673,14 +685,14 @@ export function AlertDialogContent({
             }>,
             {
               ...contextProps.componentProps,
-              className: base({className: baseClassName || props.className}),
-            },
+              className: base({ className: baseClassName || props.className }),
+            }
           )
         ) : (
           <View
             {...props}
             {...contextProps.componentProps}
-            className={base({className: baseClassName || props.className})}
+            className={base({ className: baseClassName || props.className })}
           >
             <View>{children}</View>
           </View>
@@ -722,7 +734,7 @@ export function AlertDialogTitle({
   baseClassName,
   ...props
 }: AlertDialogTitleComponentProps) {
-  const {titleProps} = useContext(AlertDialogContentContext);
+  const { titleProps } = useContext(AlertDialogContentContext);
   return asChild ? (
     React.cloneElement(
       React.Children.toArray(children)[0] as React.ReactElement<{
@@ -733,7 +745,7 @@ export function AlertDialogTitle({
         className: alertDialogTitle({
           className: baseClassName || props.className,
         }),
-      },
+      }
     )
   ) : (
     <Text
@@ -768,7 +780,7 @@ export function AlertDialogDescription({
         className: alertDialogDescription({
           className: baseClassName || props.className,
         }),
-      },
+      }
     )
   ) : (
     <Text
@@ -814,13 +826,13 @@ export function AlertDialogAction({
   asChild = false,
   baseClassName,
   variant = "destructive",
-  size = "default",
+  size = "md",
   borderRadius = "md",
   ...props
 }: AlertDialogActionComponentProps) {
-  const {state} = useContext(AlertDialogContext);
-  const {componentProps} = useDialogAction({state});
-  const {base, text} = buttonTV({
+  const { state } = useContext(AlertDialogContext);
+  const { componentProps } = useDialogAction({ state });
+  const { base, text } = buttonTV({
     variant,
     size,
     borderRadius,
@@ -832,16 +844,16 @@ export function AlertDialogAction({
       {
         ...(componentProps as ComponentProps<typeof Pressable>),
         ...props,
-        className: base({className: baseClassName || props.className}),
-      },
+        className: base({ className: baseClassName || props.className }),
+      }
     )
   ) : (
     <Pressable
       {...(componentProps as ComponentProps<typeof Pressable>)}
       {...props}
-      className={base({className: baseClassName || props.className})}
+      className={base({ className: baseClassName || props.className })}
     >
-      <Text className={text({className: baseClassName || props.className})}>
+      <Text className={text({ className: baseClassName || props.className })}>
         {children}
       </Text>
     </Pressable>
@@ -858,13 +870,13 @@ export function AlertDialogCancel({
   asChild = false,
   baseClassName,
   variant = "outline",
-  size = "default",
+  size = "md",
   borderRadius = "md",
   ...props
 }: AlertDialogCancelComponentProps) {
-  const {state} = useContext(AlertDialogContext);
-  const {componentProps} = useDialogAction({state});
-  const {base, text} = buttonTV({
+  const { state } = useContext(AlertDialogContext);
+  const { componentProps } = useDialogAction({ state });
+  const { base, text } = buttonTV({
     variant,
     size,
     borderRadius,
@@ -876,16 +888,16 @@ export function AlertDialogCancel({
       {
         ...(componentProps as ComponentProps<typeof Pressable>),
         ...props,
-        className: base({className: baseClassName || props.className}),
-      },
+        className: base({ className: baseClassName || props.className }),
+      }
     )
   ) : (
     <Pressable
       {...(componentProps as ComponentProps<typeof Pressable>)}
       {...props}
-      className={base({className: baseClassName || props.className})}
+      className={base({ className: baseClassName || props.className })}
     >
-      <Text className={text({className: baseClassName || props.className})}>
+      <Text className={text({ className: baseClassName || props.className })}>
         {children}
       </Text>
     </Pressable>

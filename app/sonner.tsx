@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { toast, Toaster } from "@/components/ui/sonner";
-import React from "react";
 import { View } from "react-native";
 
 export default function SonnerPage() {

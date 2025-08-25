@@ -12,7 +12,7 @@ import { View } from "react-native";
 
 export default function BreadcrumbPageRoute() {
   return (
-    <View>
+    <View className="m-4">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>

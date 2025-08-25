@@ -16,8 +16,8 @@ import { Text, View } from "react-native";
 
 export default function SheetPage() {
   return (
-    <View className="m-auto">
-      <Sheet>
+    <View className="h-screen w-screen">
+      <Sheet >
         <SheetTrigger asChild>
           <Button>Open sheet</Button>
         </SheetTrigger>

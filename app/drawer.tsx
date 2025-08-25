@@ -14,10 +14,10 @@ import { View } from "react-native";
 
 export default function DrawerPage() {
   return (
-    <View>
+    <View className="p-4">
       <Drawer>
         <DrawerTrigger asChild>
-          <Button className="m-4">Open drawer</Button>
+          <Button>Open drawer</Button>
         </DrawerTrigger>
         <DrawerContent snapPoints={[200, 400]} initialSnapIndex={0}>
           <DrawerHeader>

@@ -15,10 +15,10 @@ import { View } from "react-native";
 
 export default function AlertDialogPage() {
   return (
-    <View>
+    <View className="h-[80%] m-4">
       <AlertDialog>
-        <AlertDialogTrigger asChild className="m-4">
-          <Button variant="outline">Delete Account</Button>
+        <AlertDialogTrigger asChild>
+          <Button>Delete Account</Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>

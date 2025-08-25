@@ -405,10 +405,13 @@ export function HoverCardTrigger({
       className: baseClass,
     })
   ) : (
-    <Pressable {...props} {...componentProps} className={baseClass}>
-      <Text onFocus={open} className={text({ className: textClassName })}>
-        {children}
-      </Text>
+    <Pressable
+      {...props}
+      {...componentProps}
+      className={baseClass}
+      onFocus={open}
+    >
+      <Text className={text({ className: textClassName })}>{children}</Text>
     </Pressable>
   );
 }

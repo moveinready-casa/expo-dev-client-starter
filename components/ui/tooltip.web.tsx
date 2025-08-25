@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import {tv} from "tailwind-variants";
-import {ThemeContext, themes} from "../theme";
+import * as React from "react";
+import { tv } from "tailwind-variants";
+import { ThemeContext, themes } from "../theme";
 
 /**
  * Tailwind variant function for tooltip content styling.
@@ -49,7 +49,7 @@ export const TooltipContent = ({
   sideOffset = 4,
   ...props
 }: React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>) => {
-  const {colorScheme} = React.useContext(ThemeContext);
+  const { colorScheme } = React.useContext(ThemeContext);
   const colorStyles = {
     backgroundColor: themes[colorScheme]["--primary"],
     color: themes[colorScheme]["--primary-foreground"],
@@ -63,7 +63,7 @@ export const TooltipContent = ({
       <TooltipPrimitive.Content
         data-slot="tooltip-content"
         sideOffset={sideOffset}
-        className={tooltipContent({className: className})}
+        className={tooltipContent({ className: className })}
         style={colorStyles}
         {...props}
       >

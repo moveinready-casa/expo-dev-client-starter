@@ -4,10 +4,16 @@ import {
   useBreadcrumbs as useBreadcrumbAria,
   useBreadcrumbItem as useBreadcrumbItemAria,
 } from "@react-aria/breadcrumbs";
-import {ChevronRightIcon, MoreHorizontalIcon} from "lucide-react-native";
-import React, {ComponentProps, createContext, useContext, useRef} from "react";
-import {Platform, Pressable, View, Linking, Text} from "react-native";
-import {tv} from "tailwind-variants";
+import { router } from "expo-router";
+import { ChevronRightIcon, MoreHorizontalIcon } from "lucide-react-native";
+import React, {
+  ComponentProps,
+  createContext,
+  useContext,
+  useRef,
+} from "react";
+import { Platform, Pressable, Text, View } from "react-native";
+import { tv } from "tailwind-variants";
 
 /**
  * Base props for the root `Breadcrumb` component, context, and hook.
@@ -129,6 +135,17 @@ export type BreadcrumbSeparatorComponentProps = {
 } & ComponentProps<typeof View>;
 
 /**
+ * Props for the `BreadcrumbEllipsis` component.
+ * @param asChild - If true clones the child and passes all accessibility and functionality props to it. Available on any exported component.
+ * @param baseClassName - Custom tailwind classes to apply to the base breadcrumb ellipsis component. Takes priority over the `className` prop.
+ */
+export type BreadcrumbEllipsisComponentProps = {
+  children?: React.ReactNode;
+  asChild?: boolean;
+  baseClassName?: string;
+} & Partial<ComponentProps<typeof View>>;
+
+/**
  * Context value for the `Breadcrumb` component.
  * @param props - Props from the top-level Breadcrumb component.
  * @see BreadcrumbReturn
@@ -145,169 +162,6 @@ export type BreadcrumbContextProps = {
 export type BreadcrumbContextItemProps = {
   disabled?: boolean;
 } & BreadcrumbItemReturn;
-
-/**
- * The use breadcrumb hook is the backbone of the breadcrumb component.
- * @param props - Props to configure the behavior of the breadcrumb. @see BreadcrumbProps
- * @returns Returns both the navigation and list accessibility props to pass to the breadcrumb components. @see BreadcrumbReturn
- */
-export const useBreadcrumb = ({
-  ...props
-}: BreadcrumbProps): BreadcrumbReturn => {
-  const {navProps} = useBreadcrumbAria(props);
-
-  return {
-    navProps: {
-      ...navProps,
-      accessible: true,
-      role: "navigation",
-      accessibilityRole: "navigation",
-    },
-    listProps: {
-      accessible: false,
-      role: "list",
-      accessibilityRole: "list",
-    },
-  };
-};
-
-/**
- * The use breadcrumb item hook is the backbone of the breadcrumb item component.
- * @param props - Props to configure the behavior of the breadcrumb item. @see BreadcrumbItemProps
- * @returns Returns state and accessibility props for both the link and page components. @see BreadcrumbItemReturn
- */
-export const useBreadcrumbItem = ({
-  disabled,
-  ...props
-}: BreadcrumbItemProps): BreadcrumbItemReturn => {
-  let linkProps: BreadcrumbItemReturn["linkProps"];
-
-  if (Platform.OS === "web") {
-    const webLinkRef = useRef<HTMLAnchorElement>(null);
-    const {itemProps: webLinkProps} = useBreadcrumbItemAria(
-      {...props, isDisabled: disabled},
-      webLinkRef,
-    );
-
-    linkProps = webLinkProps;
-  }
-
-  // @ts-expect-error - link props could be defined if the platform is web
-  const existingLinkProps = linkProps || {};
-
-  linkProps = {
-    ...existingLinkProps,
-    ...props,
-    accessibilityRole: "link",
-    accessibilityState: {
-      disabled,
-    },
-    className: disabled ? "opacity-50 pointer-events-none" : "",
-  };
-
-  return {
-    pageProps: {
-      accessible: true,
-      className: disabled ? "opacity-50 pointer-events-none" : "",
-    },
-    componentProps: {
-      accessible: false,
-      role: "listitem",
-      accessibilityRole: "listitem",
-    },
-    linkProps,
-  };
-};
-
-/**
- * A context wrapper containing the global state of the breadcrumb.
- * @see BreadcrumbContextProps
- */
-export const BreadcrumbContext = createContext<BreadcrumbContextProps | null>(
-  null,
-);
-
-/**
- * The root breadcrumb component. This should be supplied once per breadcrumb group. It is required for all breadcrumbs.
- * @example
- * ```tsx
- * <Breadcrumb>
- *   <BreadcrumbList>
- *     <BreadcrumbItem>
- *       <BreadcrumbLink href="/">Home</BreadcrumbLink>
- *     </BreadcrumbItem>
- *     <BreadcrumbSeparator />
- *     <BreadcrumbItem>
- *       <BreadcrumbLink href="/products">Products</BreadcrumbLink>
- *     </BreadcrumbItem>
- *     <BreadcrumbSeparator />
- *     <BreadcrumbItem>
- *       <BreadcrumbPage>Electronics</BreadcrumbPage>
- *     </BreadcrumbItem>
- *   </BreadcrumbList>
- * </Breadcrumb>
- * ```
- * @param props - Props to configure the behavior of the breadcrumb. @see BreadcrumbComponentProps
- * @returns Returns a context wrapper containing the global state of the breadcrumb. @see BreadcrumbContextProps
- */
-export function Breadcrumb({
-  children,
-  asChild = false,
-  id,
-  "aria-label": ariaLabel,
-  "aria-labelledby": ariaLabelledby,
-  "aria-describedby": ariaDescribedby,
-  "aria-details": ariaDetails,
-  size,
-  color = "default",
-  variant = "shadcn",
-  borderRadius = "md",
-  baseClassName,
-  ...props
-}: BreadcrumbComponentProps) {
-  const {navProps, listProps} = useBreadcrumb({
-    id,
-    "aria-label": ariaLabel,
-    "aria-labelledby": ariaLabelledby,
-    "aria-describedby": ariaDescribedby,
-    "aria-details": ariaDetails,
-  });
-
-  const renderProps: React.ComponentProps<typeof View> = {
-    ...navProps,
-    ...props,
-    className: baseClassName || props.className || "",
-  };
-
-  const contextValue = {
-    navProps,
-    listProps,
-    props: {
-      size,
-      color,
-      variant,
-      borderRadius,
-    },
-  };
-
-  return (
-    <BreadcrumbContext.Provider value={contextValue}>
-      {asChild ? (
-        React.cloneElement(
-          React.Children.toArray(children)[0] as React.ReactElement<{
-            className: string;
-          }>,
-          {
-            ...renderProps,
-            className: renderProps.className,
-          },
-        )
-      ) : (
-        <View {...renderProps}>{children}</View>
-      )}
-    </BreadcrumbContext.Provider>
-  );
-}
 
 /**
  * Conditional classes for the breadcrumb list component.
@@ -334,122 +188,6 @@ export const breadcrumbList = tv({
     borderRadius: "md",
   },
 });
-
-/**
- * The breadcrumb list component. This component wraps all breadcrumb items and provides the list structure.
- * @example
- * ```tsx
- * <BreadcrumbList>
- *   <BreadcrumbItem>
- *     <BreadcrumbLink href="/">Home</BreadcrumbLink>
- *   </BreadcrumbItem>
- *   <BreadcrumbSeparator />
- *   <BreadcrumbItem>
- *     <BreadcrumbPage>Current Page</BreadcrumbPage>
- *   </BreadcrumbItem>
- * </BreadcrumbList>
- * ```
- * @param props - Props to configure the behavior of the breadcrumb list. @see BreadcrumbListComponentProps
- * @returns Returns a list container for breadcrumb items with proper accessibility attributes.
- */
-export function BreadcrumbList({
-  children,
-  asChild = false,
-  baseClassName,
-  ...props
-}: BreadcrumbListComponentProps) {
-  const breadcrumbContext = useContext(BreadcrumbContext);
-  if (!breadcrumbContext) {
-    throw new Error("BreadcrumbList must be used within a Breadcrumb");
-  }
-  const {listProps, props: breadcrumbProps} = breadcrumbContext;
-
-  const renderProps = {
-    ...listProps,
-    ...props,
-    className: breadcrumbList({
-      variant: breadcrumbProps.variant,
-      borderRadius: breadcrumbProps.borderRadius,
-      className: baseClassName || props.className,
-    }),
-  };
-
-  return asChild ? (
-    React.cloneElement(
-      React.Children.toArray(children)[0] as React.ReactElement<{
-        className: string;
-      }>,
-      {
-        ...renderProps,
-        className: renderProps.className,
-      },
-    )
-  ) : (
-    <View {...renderProps}>{children}</View>
-  );
-}
-
-/**
- * A context wrapper containing the global state of the breadcrumb item.
- * @see BreadcrumbContextItemProps
- */
-export const BreadcrumbItemContext =
-  createContext<BreadcrumbContextItemProps | null>(null);
-
-/**
- * The breadcrumb item component. This component wraps individual breadcrumb links and pages.
- * @example
- * ```tsx
- * <BreadcrumbItem>
- *   <BreadcrumbLink href="/products">Products</BreadcrumbLink>
- * </BreadcrumbItem>
- * ```
- * @param props - Props to configure the behavior of the breadcrumb item. @see BreadcrumbItemComponentProps
- * @returns Returns a context wrapper containing the global state of the breadcrumb item. @see BreadcrumbContextItemProps
- */
-export function BreadcrumbItem({
-  children,
-  asChild = false,
-  disabled,
-  baseClassName,
-  ...props
-}: BreadcrumbItemComponentProps) {
-  const breadcrumbContext = useContext(BreadcrumbContext);
-  if (!breadcrumbContext) {
-    throw new Error("BreadcrumbItem must be used within a BreadcrumbList");
-  }
-
-  const {componentProps, linkProps, pageProps} = useBreadcrumbItem({
-    disabled,
-    children,
-  });
-
-  const renderProps = {
-    ...componentProps,
-    ...props,
-    className: baseClassName || props.className || "",
-  };
-
-  return (
-    <BreadcrumbItemContext.Provider
-      value={{componentProps, linkProps, pageProps, disabled}}
-    >
-      {asChild ? (
-        React.Children.map(children, (child) => {
-          if (React.isValidElement(child)) {
-            return React.cloneElement(child as React.ReactElement<any>, {
-              ...renderProps,
-              className: renderProps.className,
-            });
-          }
-          return child;
-        })
-      ) : (
-        <View {...renderProps}>{children}</View>
-      )}
-    </BreadcrumbItemContext.Provider>
-  );
-}
 
 /**
  * Conditional classes for the breadcrumb link component.
@@ -497,78 +235,6 @@ export const breadcrumbLink = tv({
 });
 
 /**
- * The breadcrumb link component. This component renders a clickable link that navigates to a URL.
- * @example
- * ```tsx
- * <BreadcrumbLink href="/products" startContent={<HomeIcon />}>
- *   Products
- * </BreadcrumbLink>
- * ```
- * @param props - Props to configure the behavior of the breadcrumb link. @see BreadcrumbLinkComponentProps
- * @returns Returns a `Pressable` which is used to navigate to the specified URL.
- */
-export function BreadcrumbLink({
-  children,
-  asChild = false,
-  href,
-  startContent,
-  endContent,
-  baseClassName,
-  ...props
-}: BreadcrumbLinkComponentProps) {
-  const breadcrumbContext = useContext(BreadcrumbContext);
-  const breadcrumbItemContext = useContext(BreadcrumbItemContext);
-  if (!breadcrumbItemContext || !breadcrumbContext) {
-    throw new Error("BreadcrumbLink must be used within a BreadcrumbItem");
-  }
-
-  const {size, color} = breadcrumbContext.props;
-
-  const {base, text} = breadcrumbLink({size, color});
-
-  const {linkProps} = breadcrumbItemContext;
-
-  const handlePress = (e: typeof Pressable.prototype.onPress) => {
-    props.onPress?.(e);
-
-    if (!Linking.canOpenURL(href || "/")) {
-      throw new Error(
-        `Invalid URL: ${href} \n Be sure all passed URLs are supported by the linking module https://reactnative.dev/docs/linking or use the asChild prop with your routers component ie: expo-link.`,
-      );
-    }
-
-    Linking.openURL(href || "/");
-  };
-
-  const renderProps = {
-    ...linkProps,
-    ...props,
-    onPress: (e: typeof Pressable.prototype.onPress) => handlePress(e),
-    className: base({className: baseClassName || props.className}),
-  };
-
-  return asChild ? (
-    <View className={renderProps.className}>
-      {React.cloneElement(
-        React.Children.toArray(children)[0] as React.ReactElement<{
-          className: string;
-        }>,
-        {
-          ...renderProps,
-          className: text({className: baseClassName || props.className}),
-        },
-      )}
-    </View>
-  ) : (
-    <Pressable {...renderProps}>
-      {startContent}
-      <Text className={text()}>{children}</Text>
-      {endContent}
-    </Pressable>
-  );
-}
-
-/**
  * Conditional classes for the breadcrumb page component.
  * @see BreadcrumbPageComponentProps
  */
@@ -594,6 +260,376 @@ export const breadcrumbPage = tv({
 });
 
 /**
+ * Conditional classes for the breadcrumb separator component.
+ * @see BreadcrumbSeparatorComponentProps
+ */
+export const breadcrumbSeparator = tv({
+  base: "text-muted-foreground",
+  variants: {
+    size: {
+      sm: "size-3",
+      md: "size-3.5",
+      lg: "size-4",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+    color: "default",
+  },
+});
+
+/**
+ * Conditional classes for the breadcrumb ellipsis component.
+ * @see BreadcrumbEllipsisComponentProps
+ */
+export const breadcrumbEllipsis = tv({
+  extend: breadcrumbSeparator,
+  base: "justify-center",
+});
+
+/**
+ * The use breadcrumb hook is the backbone of the breadcrumb component.
+ * @param props - Props to configure the behavior of the breadcrumb. @see BreadcrumbProps
+ * @returns Returns both the navigation and list accessibility props to pass to the breadcrumb components. @see BreadcrumbReturn
+ */
+export const useBreadcrumb = ({
+  ...props
+}: BreadcrumbProps): BreadcrumbReturn => {
+  const { navProps } = useBreadcrumbAria(props);
+
+  return {
+    navProps: {
+      ...navProps,
+      accessible: true,
+      role: "navigation",
+      accessibilityRole: "navigation",
+    },
+    listProps: {
+      accessible: false,
+      role: "list",
+      accessibilityRole: "list",
+    },
+  };
+};
+
+/**
+ * The use breadcrumb item hook is the backbone of the breadcrumb item component.
+ * @param props - Props to configure the behavior of the breadcrumb item. @see BreadcrumbItemProps
+ * @returns Returns state and accessibility props for both the link and page components. @see BreadcrumbItemReturn
+ */
+export const useBreadcrumbItem = ({
+  disabled,
+  ...props
+}: BreadcrumbItemProps): BreadcrumbItemReturn => {
+  const webLinkRef = useRef<HTMLAnchorElement>(null);
+  const { itemProps: webLinkProps } = useBreadcrumbItemAria(
+    { ...props, isDisabled: disabled },
+    webLinkRef
+  );
+
+  let linkProps: BreadcrumbItemReturn["linkProps"] = {};
+
+  if (Platform.OS === "web") {
+    linkProps = webLinkProps;
+  }
+
+  linkProps = {
+    ...linkProps,
+    ...props,
+    hitSlop: 20,
+    accessibilityRole: "link",
+    accessibilityState: {
+      disabled,
+    },
+    className: disabled ? "opacity-50 pointer-events-none" : "",
+  };
+
+  return {
+    pageProps: {
+      accessible: true,
+      className: disabled ? "opacity-50 pointer-events-none" : "",
+    },
+    componentProps: {
+      accessible: false,
+      role: "listitem",
+      accessibilityRole: "listitem",
+    },
+    linkProps,
+  };
+};
+
+/**
+ * A context wrapper containing the global state of the breadcrumb.
+ * @see BreadcrumbContextProps
+ */
+export const BreadcrumbContext = createContext<BreadcrumbContextProps | null>(
+  null
+);
+
+/**
+ * A context wrapper containing the global state of the breadcrumb item.
+ * @see BreadcrumbContextItemProps
+ */
+export const BreadcrumbItemContext =
+  createContext<BreadcrumbContextItemProps | null>(null);
+
+/**
+ * The root breadcrumb component. This should be supplied once per breadcrumb group. It is required for all breadcrumbs.
+ * @example
+ * ```tsx
+ * <Breadcrumb>
+ *   <BreadcrumbList>
+ *     <BreadcrumbItem>
+ *       <BreadcrumbLink href="/">Home</BreadcrumbLink>
+ *     </BreadcrumbItem>
+ *     <BreadcrumbSeparator />
+ *     <BreadcrumbItem>
+ *       <BreadcrumbLink href="/products">Products</BreadcrumbLink>
+ *     </BreadcrumbItem>
+ *     <BreadcrumbSeparator />
+ *     <BreadcrumbItem>
+ *       <BreadcrumbPage>Electronics</BreadcrumbPage>
+ *     </BreadcrumbItem>
+ *   </BreadcrumbList>
+ * </Breadcrumb>
+ * ```
+ * @param props - Props to configure the behavior of the breadcrumb. @see BreadcrumbComponentProps
+ * @returns Returns a context wrapper containing the global state of the breadcrumb. @see BreadcrumbContextProps
+ */
+export function Breadcrumb({
+  children,
+  asChild = false,
+  id,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledby,
+  "aria-describedby": ariaDescribedby,
+  "aria-details": ariaDetails,
+  size,
+  color = "default",
+  variant = "shadcn",
+  borderRadius = "md",
+  baseClassName,
+  ...props
+}: BreadcrumbComponentProps) {
+  const { navProps, listProps } = useBreadcrumb({
+    id,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+    "aria-describedby": ariaDescribedby,
+    "aria-details": ariaDetails,
+  });
+
+  const renderProps: React.ComponentProps<typeof View> = {
+    ...navProps,
+    ...props,
+    className: baseClassName || props.className || "",
+  };
+
+  const contextValue = {
+    navProps,
+    listProps,
+    props: {
+      size,
+      color,
+      variant,
+      borderRadius,
+    },
+  };
+
+  return (
+    <BreadcrumbContext.Provider value={contextValue}>
+      {asChild ? (
+        React.cloneElement(
+          React.Children.toArray(children)[0] as React.ReactElement<{
+            className: string;
+          }>,
+          {
+            ...renderProps,
+            className: renderProps.className,
+          }
+        )
+      ) : (
+        <View {...renderProps}>{children}</View>
+      )}
+    </BreadcrumbContext.Provider>
+  );
+}
+
+/**
+ * The breadcrumb list component. This component wraps all breadcrumb items and provides the list structure.
+ * @example
+ * ```tsx
+ * <BreadcrumbList>
+ *   <BreadcrumbItem>
+ *     <BreadcrumbLink href="/">Home</BreadcrumbLink>
+ *   </BreadcrumbItem>
+ *   <BreadcrumbSeparator />
+ *   <BreadcrumbItem>
+ *     <BreadcrumbPage>Current Page</BreadcrumbPage>
+ *   </BreadcrumbItem>
+ * </BreadcrumbList>
+ * ```
+ * @param props - Props to configure the behavior of the breadcrumb list. @see BreadcrumbListComponentProps
+ * @returns Returns a list container for breadcrumb items with proper accessibility attributes.
+ */
+export function BreadcrumbList({
+  children,
+  asChild = false,
+  baseClassName,
+  ...props
+}: BreadcrumbListComponentProps) {
+  const breadcrumbContext = useContext(BreadcrumbContext);
+  if (!breadcrumbContext) {
+    throw new Error("BreadcrumbList must be used within a Breadcrumb");
+  }
+  const { listProps, props: breadcrumbProps } = breadcrumbContext;
+
+  const renderProps = {
+    ...listProps,
+    ...props,
+    className: breadcrumbList({
+      variant: breadcrumbProps.variant,
+      borderRadius: breadcrumbProps.borderRadius,
+      className: baseClassName || props.className,
+    }),
+  };
+
+  return asChild ? (
+    React.cloneElement(
+      React.Children.toArray(children)[0] as React.ReactElement<{
+        className: string;
+      }>,
+      {
+        ...renderProps,
+        className: renderProps.className,
+      }
+    )
+  ) : (
+    <View {...renderProps}>{children}</View>
+  );
+}
+
+/**
+ * The breadcrumb item component. This component wraps individual breadcrumb links and pages.
+ * @example
+ * ```tsx
+ * <BreadcrumbItem>
+ *   <BreadcrumbLink href="/products">Products</BreadcrumbLink>
+ * </BreadcrumbItem>
+ * ```
+ * @param props - Props to configure the behavior of the breadcrumb item. @see BreadcrumbItemComponentProps
+ * @returns Returns a context wrapper containing the global state of the breadcrumb item. @see BreadcrumbContextItemProps
+ */
+export function BreadcrumbItem({
+  children,
+  asChild = false,
+  disabled,
+  baseClassName,
+  ...props
+}: BreadcrumbItemComponentProps) {
+  const breadcrumbContext = useContext(BreadcrumbContext);
+  if (!breadcrumbContext) {
+    throw new Error("BreadcrumbItem must be used within a BreadcrumbList");
+  }
+
+  const { componentProps, linkProps, pageProps } = useBreadcrumbItem({
+    disabled,
+    children,
+  });
+
+  const renderProps: React.ComponentProps<typeof View> = {
+    ...props,
+    className: baseClassName || props.className || "",
+  };
+
+  return (
+    <BreadcrumbItemContext.Provider
+      value={{ componentProps, linkProps, pageProps, disabled }}
+    >
+      {asChild ? (
+        React.cloneElement(
+          React.Children.toArray(children)[0] as React.ReactElement<{
+            className: string;
+          }>,
+          {
+            ...renderProps,
+            className: renderProps.className,
+          }
+        )
+      ) : (
+        <View {...renderProps}>{children}</View>
+      )}
+    </BreadcrumbItemContext.Provider>
+  );
+}
+
+/**
+ * The breadcrumb link component. This component renders a clickable link that navigates to a URL.
+ * @example
+ * ```tsx
+ * <BreadcrumbLink href="/products" startContent={<HomeIcon />}>
+ *   Products
+ * </BreadcrumbLink>
+ * ```
+ * @param props - Props to configure the behavior of the breadcrumb link. @see BreadcrumbLinkComponentProps
+ * @returns Returns a `Pressable` which is used to navigate to the specified URL.
+ */
+export function BreadcrumbLink({
+  children,
+  asChild = false,
+  href,
+  startContent,
+  endContent,
+  baseClassName,
+  ...props
+}: BreadcrumbLinkComponentProps) {
+  const breadcrumbContext = useContext(BreadcrumbContext);
+  const breadcrumbItemContext = useContext(BreadcrumbItemContext);
+  if (!breadcrumbItemContext || !breadcrumbContext) {
+    throw new Error("BreadcrumbLink must be used within a BreadcrumbItem");
+  }
+
+  const { size, color } = breadcrumbContext.props;
+
+  const { base, text } = breadcrumbLink({ size, color });
+
+  const { linkProps } = breadcrumbItemContext;
+
+  const handlePress = (e: typeof Pressable.prototype.onPress) => {
+    props.onPress?.(e);
+
+    router.push(href || "/" as any);
+  };
+
+  const renderProps = {
+    ...linkProps,
+    ...props,
+    onPress: (e: typeof Pressable.prototype.onPress) => handlePress(e),
+    className: base({ className: baseClassName || props.className }),
+  };
+
+  return asChild ? (
+    <View className={renderProps.className}>
+      {React.cloneElement(
+        React.Children.toArray(children)[0] as React.ReactElement<{
+          className: string;
+        }>,
+        {
+          ...renderProps,
+          className: text({ className: baseClassName || props.className }),
+        }
+      )}
+    </View>
+  ) : (
+    <Pressable {...renderProps}>
+      {startContent}
+      <Text className={text()}>{children}</Text>
+      {endContent}
+    </Pressable>
+  );
+}
+
+/**
  * The breadcrumb page component. This component renders the current page text (non-clickable).
  * @example
  * ```tsx
@@ -614,9 +650,9 @@ export function BreadcrumbPage({
     throw new Error("BreadcrumbPage must be used within a BreadcrumbItem");
   }
 
-  const {size, color} = breadcrumbContext.props;
+  const { size, color } = breadcrumbContext.props;
 
-  const {pageProps} = breadcrumbItemContext;
+  const { pageProps } = breadcrumbItemContext;
 
   const renderProps = {
     ...pageProps,
@@ -636,31 +672,12 @@ export function BreadcrumbPage({
       {
         ...renderProps,
         className: renderProps.className,
-      },
+      }
     )
   ) : (
     <Text {...renderProps}>{children}</Text>
   );
 }
-
-/**
- * Conditional classes for the breadcrumb separator component.
- * @see BreadcrumbSeparatorComponentProps
- */
-export const breadcrumbSeparator = tv({
-  base: "text-muted-foreground",
-  variants: {
-    size: {
-      sm: "size-3",
-      md: "size-3.5",
-      lg: "size-4",
-    },
-  },
-  defaultVariants: {
-    size: "md",
-    color: "default",
-  },
-});
 
 /**
  * The breadcrumb separator component. This component renders a separator between breadcrumb items.
@@ -682,7 +699,7 @@ export function BreadcrumbSeparator({
     throw new Error("BreadcrumbSeparator must be used within a BreadcrumbList");
   }
 
-  const {size} = breadcrumbContext.props;
+  const { size } = breadcrumbContext.props;
 
   const iconSize = size === "sm" ? 10 : size === "md" ? 14 : 16;
 
@@ -699,30 +716,19 @@ export function BreadcrumbSeparator({
       {
         ...renderProps,
         className: renderProps.className,
-      },
+      }
     )
   ) : (
     <View {...renderProps}>
       {children || (
         <ChevronRightIcon
           size={iconSize}
-          className={breadcrumbSeparator({size})}
+          className={breadcrumbSeparator({ size })}
         />
       )}
     </View>
   );
 }
-
-/**
- * Props for the `BreadcrumbEllipsis` component.
- * @param asChild - If true clones the child and passes all accessibility and functionality props to it. Available on any exported component.
- * @param baseClassName - Custom tailwind classes to apply to the base breadcrumb ellipsis component. Takes priority over the `className` prop.
- */
-export type BreadcrumbEllipsisComponentProps = {
-  children?: React.ReactNode;
-  asChild?: boolean;
-  baseClassName?: string;
-} & Partial<ComponentProps<typeof View>>;
 
 /**
  * The breadcrumb ellipsis component. This component renders an ellipsis to indicate hidden breadcrumb items.
@@ -743,14 +749,14 @@ export function BreadcrumbEllipsis({
     throw new Error("BreadcrumbEllipsis must be used within a BreadcrumbList");
   }
 
-  const {size} = breadcrumbContext.props;
+  const { size } = breadcrumbContext.props;
 
   const iconSize = size === "sm" ? 10 : size === "md" ? 14 : 16;
 
   const renderProps = {
     ...props,
     size: iconSize,
-    className: breadcrumbSeparator({
+    className: breadcrumbEllipsis({
       size,
       className: baseClassName || props.className,
     }),
@@ -764,7 +770,7 @@ export function BreadcrumbEllipsis({
       {
         ...renderProps,
         className: renderProps.className,
-      },
+      }
     )
   ) : (
     <View {...renderProps}>

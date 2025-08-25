@@ -1,21 +1,21 @@
+import { useButton } from "@react-aria/button";
+import { useFocusRing } from "@react-aria/focus";
+import {
+  AlertCircleIcon,
+  AlertTriangleIcon,
+  CheckCircle2Icon,
+  InfoIcon,
+  XIcon,
+} from "lucide-react-native";
 import React, {
   ComponentProps,
   createContext,
   useContext,
-  useState,
   useEffect,
+  useState,
 } from "react";
-import {Pressable, View, Platform, Text} from "react-native";
-import {useButton} from "@react-aria/button";
-import {useFocusRing} from "@react-aria/focus";
-import {
-  XIcon,
-  InfoIcon,
-  CheckCircle2Icon,
-  AlertTriangleIcon,
-  AlertCircleIcon,
-} from "lucide-react-native";
-import {tv} from "tailwind-variants";
+import { Platform, Pressable, Text, View } from "react-native";
+import { tv } from "tailwind-variants";
 
 /**
  * Base props for the Alert component, context, and hook.
@@ -129,7 +129,7 @@ export const useAlert = ({
 }: AlertProps): AlertReturn => {
   const isControlled = isVisible != null;
   const [internalIsVisible, setInternalIsVisible] = useState<boolean>(
-    isControlled ? isVisible : isVisibleDefault,
+    isControlled ? isVisible : isVisibleDefault
   );
 
   const handleClose = () => {
@@ -154,15 +154,15 @@ export const useAlert = ({
   }, [isVisible, isControlled]);
 
   const closeButtonRef = React.useRef<View>(null);
-  const {buttonProps: ariaButtonProps} = useButton(
+  const { buttonProps: ariaButtonProps } = useButton(
     {
       onPress: handleClose,
       isDisabled: !isClosable,
       "aria-label": "Close alert",
     },
-    closeButtonRef,
+    closeButtonRef
   );
-  const {isFocusVisible, focusProps} = useFocusRing();
+  const { isFocusVisible, focusProps } = useFocusRing();
 
   return {
     state: {
@@ -184,7 +184,7 @@ export const useAlert = ({
       accessible: true,
     },
     closeButtonProps: {
-      ...(Platform.OS === "web" ? {...ariaButtonProps, ...focusProps} : {}),
+      ...(Platform.OS === "web" ? { ...ariaButtonProps, ...focusProps } : {}),
       onPress: () => handleClose(),
       accessibilityRole: "button" as const,
       accessibilityLabel: "Close alert",
@@ -370,7 +370,7 @@ export function Alert({
           {
             ...renderProps,
             className: renderProps.className,
-          },
+          }
         )
       ) : (
         <View {...renderProps}>
