@@ -1,20 +1,19 @@
-import { ComponentProps, lazy, Suspense, useContext } from "react";
-import { Platform, StyleProp } from "react-native";
+import {ComponentProps, lazy, Suspense} from "react";
+import {Platform, StyleProp, useColorScheme} from "react-native";
 import tw from "twrnc";
-import { ThemeContext } from "../theme";
 
 const SonnerNative = lazy(() =>
-  import("sonner-native").then((module) => ({ default: module.Toaster }))
+  import("sonner-native").then((module) => ({default: module.Toaster})),
 );
 const SonnerWeb = lazy(() =>
-  import("sonner").then((module) => ({ default: module.Toaster }))
+  import("sonner").then((module) => ({default: module.Toaster})),
 );
 
 const getToastNative = () =>
   import("sonner-native").then((module) => module.toast);
 const getToastWeb = () => import("sonner").then((module) => module.toast);
 
-function ToasterNative({ ...props }: ComponentProps<any>) {
+function ToasterNative({...props}: ComponentProps<any>) {
   return (
     <Suspense fallback={null}>
       <SonnerNative
@@ -25,7 +24,7 @@ function ToasterNative({ ...props }: ComponentProps<any>) {
   );
 }
 
-function ToasterWeb({ ...props }: ComponentProps<any>) {
+function ToasterWeb({...props}: ComponentProps<any>) {
   return (
     <Suspense fallback={null}>
       <SonnerWeb
@@ -46,12 +45,15 @@ function ToasterWeb({ ...props }: ComponentProps<any>) {
  * Toaster component that uses the appropriate platform-specific implementation.
  * @param props - The props for the Toaster component.
  */
-export function Toaster({ ...props }: ComponentProps<any>) {
-  const { colorScheme } = useContext(ThemeContext);
+export function Toaster({...props}: ComponentProps<any>) {
+  const colorScheme = useColorScheme();
   return Platform.OS === "web" ? (
-    <ToasterWeb {...props} theme={colorScheme} />
+    <ToasterWeb {...props} theme={colorScheme || "light"} />
   ) : (
-    <ToasterNative {...(props as ComponentProps<any>)} theme={colorScheme} />
+    <ToasterNative
+      {...(props as ComponentProps<any>)}
+      theme={colorScheme || "light"}
+    />
   );
 }
 
@@ -84,11 +86,11 @@ type Toast = {
 export const toast: Toast = ((message: string, ...props: any[]) => {
   if (Platform.OS === "web") {
     return getToastWeb().then((toastWeb) =>
-      (toastWeb as any)(message, ...props)
+      (toastWeb as any)(message, ...props),
     );
   }
   return getToastNative().then((toastNative) =>
-    (toastNative as any)(message, ...props)
+    (toastNative as any)(message, ...props),
   );
 }) as Toast;
 
@@ -96,11 +98,11 @@ methods.forEach((method) => {
   (toast as any)[method] = (...args: any[]) => {
     if (Platform.OS === "web") {
       return getToastWeb().then((toastWeb) =>
-        (toastWeb as any)[method]?.(...args)
+        (toastWeb as any)[method]?.(...args),
       );
     }
     return getToastNative().then((toastNative) =>
-      (toastNative as any)[method]?.(...args)
+      (toastNative as any)[method]?.(...args),
     );
   };
 });

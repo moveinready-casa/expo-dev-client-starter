@@ -1,8 +1,9 @@
-import { AriaToggleButtonProps, useToggleButton } from "@react-aria/button";
-import { CheckIcon, DotIcon } from "lucide-react-native";
-import { ComponentProps, useEffect, useRef, useState } from "react";
-import { Platform, Pressable } from "react-native";
-import { tv } from "tailwind-variants";
+import {useTheme} from "@/lib/utils/theme";
+import {AriaToggleButtonProps, useToggleButton} from "@react-aria/button";
+import {CheckIcon, DotIcon} from "lucide-react-native";
+import {ComponentProps, useEffect, useRef, useState} from "react";
+import {Platform, Pressable} from "react-native";
+import {tv} from "tailwind-variants";
 import tw from "twrnc";
 
 /**
@@ -14,7 +15,7 @@ import tw from "twrnc";
  * @param loading - Whether the checkbox is in a loading state (adds a pulse animation and disables interaction).
  * @param size - Size of the checkbox (`"sm" | "md" | "lg" | "xl"`).
  * @param color - Color scheme applied when the checkbox is checked.
- * @param radius - Border radius of the checkbox container.
+ * @param borderRadius - Border radius of the checkbox container.
  */
 export type CheckboxProps = {
   checked?: boolean | "indeterminate";
@@ -22,9 +23,9 @@ export type CheckboxProps = {
   onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;
   loading?: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   color?: "primary" | "secondary" | "success" | "warning" | "destructive";
-  radius?: "none" | "sm" | "md" | "lg" | "full";
+  borderRadius?: "none" | "sm" | "md" | "lg" | "xl" | "full";
 } & AriaToggleButtonProps;
 
 /**
@@ -49,7 +50,7 @@ export type CheckboxReturn = {
  * @param iconClassName - Tailwind classes applied to the icon element.
  * @param size - Size variant of the checkbox.
  * @param color - Color variant of the checkbox.
- * @param radius - Border radius variant of the checkbox.
+ * @param borderRadius - Border radius variant of the checkbox.
  * @see CheckboxProps
  */
 export type CheckboxComponentProps = {
@@ -57,7 +58,7 @@ export type CheckboxComponentProps = {
   iconClassName?: string;
   size?: "sm" | "md" | "lg" | "xl";
   color?: "primary" | "secondary" | "success" | "warning" | "destructive";
-  radius?: "none" | "sm" | "md" | "lg" | "full";
+  borderRadius?: "none" | "sm" | "md" | "lg" | "xl" | "full";
   animation?: "shadcn" | "enhanced";
 } & CheckboxProps &
   ComponentProps<typeof Pressable>;
@@ -78,12 +79,12 @@ export const useCheckbox = ({
 }: CheckboxProps): CheckboxReturn => {
   if (defaultChecked && checked) {
     throw new Error(
-      "checked and defaultChecked cannot be used at the same time"
+      "checked and defaultChecked cannot be used at the same time",
     );
   }
 
   const [isChecked, setIsChecked] = useState(
-    defaultChecked === "indeterminate" || !defaultChecked ? false : true
+    defaultChecked === "indeterminate" || !defaultChecked ? false : true,
   );
 
   const isControlled = checked !== undefined;
@@ -102,7 +103,7 @@ export const useCheckbox = ({
   const buttonRef = useRef(null);
 
   const webProps = useToggleButton(
-    { ...props },
+    {...props},
     {
       isSelected: currentChecked === true,
       setSelected: (isSelected) => {
@@ -117,7 +118,7 @@ export const useCheckbox = ({
         }
       },
     },
-    buttonRef
+    buttonRef,
   );
 
   const handlePress = (event: any) => {
@@ -152,16 +153,15 @@ export const useCheckbox = ({
  */
 export const checkbox = tv({
   slots: {
-    // Use absolute border color due to nativewind bug
-    base: "flex flex-row items-center justify-center bg-transparent border border-neutral-700 focus-visible:outline-none focus-visible:border-2 focus-visible:border-ring focus-visible:border-offset-2",
-    icon: "text-primary-foreground",
+    base: "flex flex-row items-center justify-center bg-transparent border border-border focus-visible:outline-none focus-visible:border-2 focus-visible:border-ring focus-visible:border-offset-2",
+    icon: "",
   },
   variants: {
     size: {
-      sm: { icon: "w-2 h-2" },
-      md: { icon: "w-3.5 h-3.5 m-0.5" },
-      lg: { icon: "w-5 h-5 m-1" },
-      xl: { icon: "w-6 h-6 m-1.5" },
+      sm: {icon: "w-2 h-2"},
+      md: {icon: "w-3.5 h-3.5 m-0.5"},
+      lg: {icon: "w-5 h-5 m-1"},
+      xl: {icon: "w-6 h-6 m-1.5"},
     },
     color: {
       primary: {},
@@ -170,27 +170,28 @@ export const checkbox = tv({
       warning: {},
       destructive: {},
     },
-    radius: {
-      none: { base: "rounded-none" },
-      sm: { base: "rounded-[4px]" },
-      md: { base: "rounded-md" },
-      lg: { base: "rounded-lg" },
-      full: { base: "rounded-full" },
+    borderRadius: {
+      none: {base: "rounded-none"},
+      sm: {base: "rounded-[4px]"},
+      md: {base: "rounded-md"},
+      lg: {base: "rounded-lg"},
+      xl: {base: "rounded-xl"},
+      full: {base: "rounded-full"},
     },
     disabled: {
-      true: { base: "opacity-50" },
+      true: {base: "opacity-50"},
     },
     loading: {
-      true: { base: "animate-pulse" },
+      true: {base: "animate-pulse"},
     },
     checked: {
       true: {
         base: "bg-primary",
       },
-      false: { base: "bg-transparent", icon: "opacity-0 text-white" },
+      false: {base: "bg-transparent", icon: "opacity-0"},
     },
     animation: {
-      enhanced: { icon: "transition-all duration-300" },
+      enhanced: {icon: "transition-all duration-300"},
       shadcn: {},
     },
   },
@@ -198,33 +199,33 @@ export const checkbox = tv({
     {
       color: "primary",
       checked: true,
-      className: { base: "bg-primary" },
+      className: {base: "bg-primary"},
     },
     {
       color: "secondary",
       checked: true,
-      className: { base: "bg-secondary" },
+      className: {base: "bg-secondary"},
     },
     {
       color: "success",
       checked: true,
-      className: { base: "bg-success" },
+      className: {base: "bg-success"},
     },
     {
       color: "warning",
       checked: true,
-      className: { base: "bg-warning" },
+      className: {base: "bg-warning"},
     },
     {
       color: "destructive",
       checked: true,
-      className: { base: "bg-destructive" },
+      className: {base: "bg-destructive"},
     },
   ],
   defaultVariants: {
     size: "md",
     color: "primary",
-    radius: "md",
+    borderRadius: "md",
   },
 });
 
@@ -241,7 +242,7 @@ export function Checkbox({
   defaultChecked,
   size = "md",
   color,
-  radius = "md",
+  borderRadius = "md",
   disabled = false,
   loading = false,
   animation = "shadcn",
@@ -249,7 +250,8 @@ export function Checkbox({
   iconClassName,
   ...props
 }: CheckboxComponentProps) {
-  const { props: ariaProps, state } = useCheckbox({
+  const currentTheme = useTheme();
+  const {props: ariaProps, state} = useCheckbox({
     checked,
     defaultChecked,
     disabled,
@@ -260,10 +262,10 @@ export function Checkbox({
   const isIndeterminate =
     checked === "indeterminate" || defaultChecked === "indeterminate";
 
-  const { base, icon } = checkbox({
+  const {base, icon} = checkbox({
     size,
     color,
-    radius,
+    borderRadius,
     disabled: disabled || loading,
     loading,
     checked: state.isChecked || false,
@@ -273,25 +275,28 @@ export function Checkbox({
   const renderProps = {
     ...ariaProps,
     ...props,
-    className: base({ className: baseClassName || props.className }),
+    className: base({className: baseClassName || props.className}),
   };
 
   return (
     <Pressable {...renderProps}>
       {isIndeterminate ? (
         <DotIcon
-          style={tw.style(icon({ className: iconClassName }))}
+          style={tw.style(icon({className: iconClassName}))}
           testID="checkbox-icon"
+          color={currentTheme.primaryForeground}
         />
       ) : state.isChecked ? (
         <CheckIcon
-          style={tw.style(icon({ className: iconClassName }))}
+          style={tw.style(icon({className: iconClassName}))}
           testID="checkbox-icon"
+          color={currentTheme.primaryForeground}
         />
       ) : (
         <CheckIcon
-          style={tw.style(icon({ className: iconClassName }))}
+          style={tw.style(icon({className: iconClassName}))}
           testID="checkbox-icon"
+          color={currentTheme.primaryForeground}
         />
       )}
     </Pressable>

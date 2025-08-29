@@ -126,7 +126,7 @@ export const button = tv({
   },
   variants: {
     variant: {
-     default: {
+      default: {
         base: "bg-primary text-primary-foreground shadow hover:opacity-90",
         text: "text-primary-foreground",
       },

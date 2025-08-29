@@ -1,5 +1,6 @@
-import { useButton } from "@react-aria/button";
-import { useFocusRing } from "@react-aria/focus";
+import {useTheme} from "@/lib/utils/theme";
+import {useButton} from "@react-aria/button";
+import {useFocusRing} from "@react-aria/focus";
 import {
   AlertCircleIcon,
   AlertTriangleIcon,
@@ -14,13 +15,13 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
-import { tv } from "tailwind-variants";
+import {Platform, Pressable, Text, View} from "react-native";
+import {tv} from "tailwind-variants";
 
 /**
  * Base props for the Alert component, context, and hook.
  * @param variant - The variant of the alert.
- * @param radius - The border radius of the alert.
+ * @param borderRadius - The border radius of the alert.
  * @param isVisible - Whether the alert is visible.
  * @param isClosable - Whether the alert can be closed.
  * @param hideIcon - Whether to hide the icon.
@@ -32,7 +33,7 @@ import { tv } from "tailwind-variants";
  */
 export type AlertProps = {
   variant?: "default" | "success" | "warning" | "destructive";
-  radius?: "none" | "sm" | "md" | "lg" | "xl";
+  borderRadius?: "none" | "sm" | "md" | "lg" | "xl";
   isVisible?: boolean;
   isVisibleDefault?: boolean;
   isClosable?: boolean;
@@ -129,7 +130,7 @@ export const useAlert = ({
 }: AlertProps): AlertReturn => {
   const isControlled = isVisible != null;
   const [internalIsVisible, setInternalIsVisible] = useState<boolean>(
-    isControlled ? isVisible : isVisibleDefault
+    isControlled ? isVisible : isVisibleDefault,
   );
 
   const handleClose = () => {
@@ -154,15 +155,15 @@ export const useAlert = ({
   }, [isVisible, isControlled]);
 
   const closeButtonRef = React.useRef<View>(null);
-  const { buttonProps: ariaButtonProps } = useButton(
+  const {buttonProps: ariaButtonProps} = useButton(
     {
       onPress: handleClose,
       isDisabled: !isClosable,
       "aria-label": "Close alert",
     },
-    closeButtonRef
+    closeButtonRef,
   );
-  const { isFocusVisible, focusProps } = useFocusRing();
+  const {isFocusVisible, focusProps} = useFocusRing();
 
   return {
     state: {
@@ -184,7 +185,7 @@ export const useAlert = ({
       accessible: true,
     },
     closeButtonProps: {
-      ...(Platform.OS === "web" ? { ...ariaButtonProps, ...focusProps } : {}),
+      ...(Platform.OS === "web" ? {...ariaButtonProps, ...focusProps} : {}),
       onPress: () => handleClose(),
       accessibilityRole: "button" as const,
       accessibilityLabel: "Close alert",
@@ -234,7 +235,7 @@ export const alert = tv({
         closeIcon: "text-destructive",
       },
     },
-    radius: {
+    borderRadius: {
       none: {
         base: "rounded-none",
       },
@@ -264,7 +265,7 @@ export const alert = tv({
   },
   defaultVariants: {
     variant: "default",
-    radius: "lg",
+    borderRadius: "lg",
     isClosable: false,
     hideIcon: false,
   },
@@ -288,7 +289,7 @@ export function Alert({
   children,
   asChild = false,
   variant = "default",
-  radius = "lg",
+  borderRadius = "lg",
   isVisible,
   isVisibleDefault = true,
   isClosable = false,
@@ -321,14 +322,31 @@ export function Alert({
   const getDefaultIcon = (variant: AlertProps["variant"]) => {
     switch (variant) {
       case "destructive":
-        return <AlertCircleIcon className={iconClass()} />;
+        return (
+          <AlertCircleIcon
+            className={iconClass()}
+            color={currentTheme.foreground}
+          />
+        );
       case "success":
-        return <CheckCircle2Icon className={iconClass()} />;
+        return (
+          <CheckCircle2Icon
+            className={iconClass()}
+            color={currentTheme.foreground}
+          />
+        );
       case "warning":
-        return <AlertTriangleIcon className={iconClass()} />;
+        return (
+          <AlertTriangleIcon
+            className={iconClass()}
+            color={currentTheme.foreground}
+          />
+        );
       case "default":
       default:
-        return <InfoIcon className={iconClass()} />;
+        return (
+          <InfoIcon className={iconClass()} color={currentTheme.foreground} />
+        );
     }
   };
 
@@ -337,7 +355,7 @@ export function Alert({
     ...props,
     className: base({
       variant,
-      radius,
+      borderRadius,
       isClosable,
       hideIcon,
       className: baseClassName || props.className,
@@ -348,7 +366,7 @@ export function Alert({
     ...alertState,
     props: {
       variant,
-      radius,
+      borderRadius,
       isVisible,
       isVisibleDefault,
       isClosable,
@@ -360,6 +378,8 @@ export function Alert({
     },
   };
 
+  const currentTheme = useTheme();
+
   return alertState.state.isVisible ? (
     <AlertContext.Provider value={contextValue}>
       {asChild ? (
@@ -370,7 +390,7 @@ export function Alert({
           {
             ...renderProps,
             className: renderProps.className,
-          }
+          },
         )
       ) : (
         <View {...renderProps}>
@@ -387,7 +407,7 @@ export function Alert({
               className={closeButton()}
               {...closeButtonProps}
             >
-              <XIcon className={closeIcon()} />
+              <XIcon className={closeIcon()} color={currentTheme.foreground} />
             </Pressable>
           )}
         </View>

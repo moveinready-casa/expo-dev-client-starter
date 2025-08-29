@@ -1,5 +1,6 @@
-import { AlertTriangleIcon } from "lucide-react-native";
-import React, { ComponentProps, ReactNode } from "react";
+import {useTheme} from "@/lib/utils/theme";
+import {AlertTriangleIcon} from "lucide-react-native";
+import React, {ComponentProps, ReactNode} from "react";
 import {
   AccessibilityState,
   ActivityIndicator,
@@ -7,7 +8,7 @@ import {
   View,
   ViewProps,
 } from "react-native";
-import { tv } from "tailwind-variants";
+import {tv} from "tailwind-variants";
 
 /**
  * Loading / error / idle states for status indicator.
@@ -16,11 +17,9 @@ export type BadgeStatus = "idle" | "loading" | "error";
 
 /**
  * Props for the `Badge` component.
- */
-/**
- * Props for the `Badge` component.
  * @param children The content to display inside the badge.
  * @param variant Visual variant of the badge.
+ * @param size Size variant of the badge (sm, md, lg, xl).
  * @param borderRadius Border radius of the badge.
  * @param disabled Disabled state of the badge.
  * @param status Status for indicator (idle, loading, error).
@@ -32,6 +31,7 @@ export type BadgeStatus = "idle" | "loading" | "error";
 export type BadgeProps = {
   children: ReactNode;
   variant?: "default" | "secondary" | "destructive" | "outline";
+  size?: "sm" | "md" | "lg" | "xl";
   borderRadius?: "none" | "sm" | "md" | "lg" | "xl";
   disabled?: boolean;
   status?: BadgeStatus;
@@ -44,9 +44,9 @@ export type BadgeProps = {
  * Conditional classes for the `Badge` component.
  */
 export const badge = tv({
-  base: "inline-flex items-center justify-center rounded-md border px-2 py-0.5 w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
+  base: "inline-flex items-center justify-center rounded-md border w-fit whitespace-nowrap shrink-0 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden",
   slots: {
-    text: "text-xs font-medium",
+    text: "font-medium",
   },
   variants: {
     variant: {
@@ -67,7 +67,25 @@ export const badge = tv({
         text: "text-foreground",
       },
     },
-    radius: {
+    size: {
+      sm: {
+        base: "px-1.5 py-0.5 [&>svg]:size-3",
+        text: "text-xs",
+      },
+      md: {
+        base: "px-2 py-0.5 [&>svg]:size-3",
+        text: "text-xs",
+      },
+      lg: {
+        base: "px-2.5 py-1 [&>svg]:size-4",
+        text: "text-sm",
+      },
+      xl: {
+        base: "px-3 py-1.5 [&>svg]:size-5",
+        text: "text-base",
+      },
+    },
+    borderRadius: {
       none: "rounded-none",
       sm: "rounded-sm",
       md: "rounded-md",
@@ -81,7 +99,8 @@ export const badge = tv({
   },
   defaultVariants: {
     variant: "default",
-    radius: "lg",
+    size: "md",
+    borderRadius: "lg",
     disabled: false,
   },
 });
@@ -92,6 +111,7 @@ export const badge = tv({
 export function Badge({
   children,
   variant = "default",
+  size = "md",
   borderRadius = "lg",
   disabled = false,
   status,
@@ -100,9 +120,11 @@ export function Badge({
   asChild = false,
   ...props
 }: BadgeProps) {
-  const { base, text } = badge({
+  const currentTheme = useTheme();
+  const {base, text} = badge({
     variant,
-    radius: borderRadius,
+    size,
+    borderRadius,
     disabled,
   });
 
@@ -118,7 +140,12 @@ export function Badge({
     if (status === "loading") {
       return <ActivityIndicator testID="badge-loading-icon" />;
     } else if (status === "error") {
-      return <AlertTriangleIcon testID="badge-error-icon" />;
+      return (
+        <AlertTriangleIcon
+          testID="badge-error-icon"
+          color={currentTheme.foreground}
+        />
+      );
     } else if (status === "idle") {
       return null;
     }
@@ -127,7 +154,7 @@ export function Badge({
   const renderProps: ComponentProps<typeof View> = {
     ...props,
     accessibilityState,
-    className: base({ className: baseClassName || props.className }),
+    className: base({className: baseClassName || props.className}),
   };
 
   return asChild ? (

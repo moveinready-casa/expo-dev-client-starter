@@ -1,5 +1,5 @@
-import { AriaButtonProps, useButton } from "@react-aria/button";
-import { useFocusRing } from "@react-aria/focus";
+import {AriaButtonProps, useButton} from "@react-aria/button";
+import {useFocusRing} from "@react-aria/focus";
 import React, {
   ComponentProps,
   createContext,
@@ -7,7 +7,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import {Platform, Pressable, Text, View} from "react-native";
 import Reanimated, {
   Easing,
   useAnimatedStyle,
@@ -15,7 +15,7 @@ import Reanimated, {
   withDelay,
   withTiming,
 } from "react-native-reanimated";
-import { tv } from "tailwind-variants";
+import {tv} from "tailwind-variants";
 
 /**
  * Base props for the root `HoverCard` component, context, and hook.
@@ -167,7 +167,7 @@ export const useHoverCard = ({
   };
 
   return {
-    state: { isOpen, setIsOpen, isControlled },
+    state: {isOpen, setIsOpen, isControlled},
     componentProps: {
       onMouseLeave: () => {
         setIsOpen(false);
@@ -194,16 +194,16 @@ export function useHoverCardTrigger({
     ...props,
     isDisabled: disabled || loading,
   };
-  const { buttonProps } = useButton(ariaProps, ref);
-  const { focusProps } = useFocusRing();
+  const {buttonProps} = useButton(ariaProps, ref);
+  const {focusProps} = useFocusRing();
 
   const componentProps = {
-    ...(Platform.OS === "web" ? { ...buttonProps, ...focusProps } : {}),
+    ...(Platform.OS === "web" ? {...buttonProps, ...focusProps} : {}),
     onMouseEnter: () => {
       state.setIsOpen(true);
     },
     accessibilityRole: "button",
-    accessibilityState: { disabled: disabled || loading },
+    accessibilityState: {disabled: disabled || loading},
     focusable: true,
     onFocus: () => {
       state.setIsOpen(true);
@@ -213,7 +213,7 @@ export function useHoverCardTrigger({
     },
   };
 
-  return { componentProps };
+  return {componentProps};
 }
 
 /**
@@ -229,15 +229,15 @@ export function useHoverCardContent({
   const progress = useSharedValue(0);
 
   const sideOffset = 8;
-  const start = { x: 0, y: -sideOffset };
+  const start = {x: 0, y: -sideOffset};
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
       opacity: progress.value,
       transform: [
-        { scale: 0.95 + 0.05 * progress.value },
-        { translateX: start.x * (1 - progress.value) },
-        { translateY: start.y * (1 - progress.value) },
+        {scale: 0.95 + 0.05 * progress.value},
+        {translateX: start.x * (1 - progress.value)},
+        {translateY: start.y * (1 - progress.value)},
       ],
     };
   });
@@ -259,7 +259,7 @@ export function useHoverCardContent({
         withTiming(1, {
           duration: 150,
           easing: Easing.out(Easing.cubic),
-        })
+        }),
       );
     } else {
       progress.value = withTiming(0, {
@@ -282,7 +282,7 @@ export function useHoverCardContent({
  * @see HoverCardComponentProps
  */
 export const HoverCardContext = createContext<
-  HoverCardReturn & { props: Partial<HoverCardComponentProps> }
+  HoverCardReturn & {props: Partial<HoverCardComponentProps>}
 >({
   state: {
     isOpen: false,
@@ -357,7 +357,7 @@ export function HoverCard({
   };
 
   return (
-    <HoverCardContext.Provider value={{ ...hook, props }}>
+    <HoverCardContext.Provider value={{...hook, props}}>
       <View {...renderProps}>{children}</View>
     </HoverCardContext.Provider>
   );
@@ -380,27 +380,27 @@ export function HoverCardTrigger({
   loading = false,
   ...props
 }: HoverCardTriggerComponentProps) {
-  const { state } = useContext(HoverCardContext);
+  const {state} = useContext(HoverCardContext);
 
   const open = () => {
     if (disabled || loading) return;
     state.setIsOpen(true);
   };
 
-  const { componentProps } = useHoverCardTrigger({
+  const {componentProps} = useHoverCardTrigger({
     ...props,
     disabled,
     loading,
     state,
   });
 
-  const { base, text } = hoverCardTrigger({ disabled, loading });
+  const {base, text} = hoverCardTrigger({disabled, loading});
   const baseClass = base({
     className: baseClassName || props.className,
   });
 
   return asChild && React.isValidElement(children) ? (
-    React.cloneElement(children as React.ReactElement<{ className?: string }>, {
+    React.cloneElement(children as React.ReactElement<{className?: string}>, {
       ...componentProps,
       className: baseClass,
     })
@@ -411,7 +411,7 @@ export function HoverCardTrigger({
       className={baseClass}
       onFocus={open}
     >
-      <Text className={text({ className: textClassName })}>{children}</Text>
+      <Text className={text({className: textClassName})}>{children}</Text>
     </Pressable>
   );
 }
@@ -431,11 +431,11 @@ export function HoverCardContent({
   textClassName,
   ...props
 }: HoverCardContentComponentProps) {
-  const { state } = useContext(HoverCardContext);
-  const { componentProps } = useHoverCardContent({
+  const {state} = useContext(HoverCardContext);
+  const {componentProps} = useHoverCardContent({
     state,
   });
-  const { text, base } = hoverCardContent();
+  const {text, base} = hoverCardContent();
 
   const renderProps = {
     ...componentProps,
@@ -447,8 +447,8 @@ export function HoverCardContent({
   return asChild ? (
     (() => {
       const onlyChild = React.Children.toArray(
-        children
-      )[0] as React.ReactElement<{ className?: string }>;
+        children,
+      )[0] as React.ReactElement<{className?: string}>;
       return (
         <Reanimated.View {...componentProps}>
           <View
@@ -473,7 +473,7 @@ export function HoverCardContent({
           className: baseClassName || props.className,
         })}
       >
-        <Text className={text({ className: textClassName })}>{children}</Text>
+        <Text className={text({className: textClassName})}>{children}</Text>
       </View>
     </Reanimated.View>
   );

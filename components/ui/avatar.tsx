@@ -1,12 +1,12 @@
-import {
+import React, {
   ComponentProps,
   createContext,
   useContext,
   useEffect,
   useState,
 } from "react";
-import { Image, ImageProps, ImageURISource, View } from "react-native";
-import { tv } from "tailwind-variants";
+import {Image, ImageProps, ImageURISource, Text, View} from "react-native";
+import {tv} from "tailwind-variants";
 
 /**
  * Possible loading statuses for the avatar image.
@@ -29,14 +29,14 @@ export type AvatarContextValue = {
  * Props for the `Avatar` component.
  * @param baseClassName - Custom tailwind classes applied to the root element. Takes precedence over the `className` prop.
  * @param size - Avatar size
- * @param radius - Border radius
+ * @param borderRadius - Border radius
  * @param isBordered - Adds a ring border
  * @param isDisabled - Disabled state
  */
 export type AvatarComponentProps = {
   baseClassName?: string;
-  size?: "sm" | "md" | "lg";
-  radius?: "none" | "sm" | "md" | "lg" | "full";
+  size?: "sm" | "md" | "lg" | "xl";
+  borderRadius?: "none" | "sm" | "md" | "lg" | "xl" | "full";
   variant?: "shadcn" | "warning" | "error" | "success";
   isBordered?: boolean;
   isDisabled?: boolean;
@@ -55,6 +55,7 @@ export type AvatarImageComponentProps = {
  * @param baseClassName - Custom tailwind classes applied to the fallback element. Takes precedence over the `className` prop.
  */
 export type AvatarFallbackComponentProps = {
+  asChild?: boolean;
   baseClassName?: string;
 } & ComponentProps<typeof View>;
 
@@ -76,12 +77,14 @@ export const avatar = tv({
       sm: "w-8 h-8 text-sm",
       md: "w-10 h-10 text-base",
       lg: "w-12 h-12 text-lg",
+      xl: "w-16 h-16 text-xl",
     },
-    radius: {
+    borderRadius: {
       none: "rounded-none",
       sm: "rounded-sm",
       md: "rounded-md",
       lg: "rounded-lg",
+      xl: "rounded-xl",
       full: "rounded-full",
     },
     isBordered: {
@@ -111,7 +114,7 @@ export const avatar = tv({
   defaultVariants: {
     variant: "shadcn",
     size: "md",
-    radius: "full",
+    borderRadius: "full",
     isBordered: false,
     isDisabled: false,
   },
@@ -146,7 +149,7 @@ export function Avatar({
   children,
   baseClassName,
   size = "md",
-  radius = "full",
+  borderRadius = "full",
   isBordered = false,
   isDisabled = false,
   variant = "shadcn",
@@ -156,7 +159,7 @@ export function Avatar({
 
   const className = avatar({
     size,
-    radius,
+    borderRadius,
     isBordered,
     isDisabled,
     variant,
@@ -164,11 +167,11 @@ export function Avatar({
   });
 
   return (
-    <AvatarContext.Provider value={{ status, setStatus }}>
+    <AvatarContext.Provider value={{status, setStatus}}>
       <View
         {...props}
         className={className}
-        accessibilityState={{ disabled: isDisabled }}
+        accessibilityState={{disabled: isDisabled}}
       >
         {children}
       </View>
@@ -191,7 +194,7 @@ export function AvatarImage({
     throw new Error("AvatarImage must be used within an Avatar");
   }
 
-  const { setStatus, status } = context;
+  const {setStatus, status} = context;
 
   const className = avatarImageStyles({
     className: baseClassName || props.className,
@@ -234,6 +237,7 @@ export function AvatarImage({
 export function AvatarFallback({
   children,
   baseClassName,
+  asChild,
   ...props
 }: AvatarFallbackComponentProps) {
   const context = useContext(AvatarContext);
@@ -242,7 +246,7 @@ export function AvatarFallback({
     throw new Error("AvatarFallback must be used within an Avatar");
   }
 
-  const { status } = context;
+  const {status} = context;
 
   if (status !== "error") {
     return null;
@@ -252,9 +256,14 @@ export function AvatarFallback({
     className: baseClassName || props.className,
   });
 
-  return (
+  return asChild ? (
+    React.cloneElement(
+      React.Children.only(children as React.ReactElement<{className?: string}>),
+      {className},
+    )
+  ) : (
     <View {...props} className={className}>
-      {children}
+      <Text>{children}</Text>
     </View>
   );
 }

@@ -1,7 +1,8 @@
-import { useButton } from "@react-aria/button";
-import { useDisclosure as useAccordionAria } from "@react-aria/disclosure";
-import { useFocusRing } from "@react-aria/focus";
-import { ChevronDownIcon } from "lucide-react-native";
+import {useTheme} from "@/lib/utils/theme";
+import {useButton} from "@react-aria/button";
+import {useDisclosure as useAccordionAria} from "@react-aria/disclosure";
+import {useFocusRing} from "@react-aria/focus";
+import {ChevronDownIcon} from "lucide-react-native";
 import React, {
   ComponentProps,
   createContext,
@@ -25,8 +26,7 @@ import Reanimated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { tv } from "tailwind-variants";
-import { ThemeContext, themes } from "../theme";
+import {tv} from "tailwind-variants";
 
 /**
  * Base props for the root `Accordion` component, context, and hook.
@@ -228,7 +228,7 @@ export const useAccordion = ({
 
   const isControlled = value !== undefined;
   const [internalValue, setInternalValue] = useState<string | string[] | null>(
-    defaultValue ?? (type === "multiple" ? [] : null)
+    defaultValue ?? (type === "multiple" ? [] : null),
   );
 
   const expandedValue = isControlled ? value : internalValue;
@@ -262,8 +262,8 @@ export const useAccordionItem = ({
   state,
   props,
 }: AccordionItemProps): AccordionItemReturn => {
-  const { expandedValue, setExpandedValue } = state;
-  const { type, collapsible, loading } = props;
+  const {expandedValue, setExpandedValue} = state;
+  const {type, collapsible, loading} = props;
   const isMultiple = type === "multiple";
 
   const controlled = () => {
@@ -309,7 +309,7 @@ export const useAccordionItem = ({
   const contentRef = useRef<View>(null);
   const triggerRef = useRef<View>(null);
 
-  const { buttonProps: triggerProps, panelProps: contentProps } =
+  const {buttonProps: triggerProps, panelProps: contentProps} =
     useAccordionAria(
       {
         isDisabled: isControlled || loading || isDisabled,
@@ -322,11 +322,11 @@ export const useAccordionItem = ({
         collapse: () => updateIsExpanded(false),
         toggle: () => handlePress(),
       },
-      contentRef
+      contentRef,
     );
 
-  const { buttonProps } = useButton(triggerProps, triggerRef);
-  const { isFocusVisible, focusProps } = useFocusRing();
+  const {buttonProps} = useButton(triggerProps, triggerRef);
+  const {isFocusVisible, focusProps} = useFocusRing();
 
   return {
     componentProps: {
@@ -339,16 +339,16 @@ export const useAccordionItem = ({
       isFocusVisible,
     },
     triggerProps: {
-      ...(Platform.OS === "web" ? { ...buttonProps, ...focusProps } : {}),
+      ...(Platform.OS === "web" ? {...buttonProps, ...focusProps} : {}),
       onPress: handlePress,
       accessibilityRole: "button",
-      accessibilityState: { isExpanded },
+      accessibilityState: {isExpanded},
       accessibilityHint: isExpanded
         ? "Collapse the content"
         : "Expands the content",
     },
     contentProps: {
-      ...(Platform.OS === "web" ? { ...contentProps } : {}),
+      ...(Platform.OS === "web" ? {...contentProps} : {}),
       accessible: true,
       accessibilityElementsHidden: !isExpanded,
       accessibilityLiveRegion: "polite",
@@ -361,7 +361,7 @@ export const useAccordionItem = ({
  * @see AccordionContextValue
  */
 export const AccordionContext = createContext<AccordionContextValue | null>(
-  null
+  null,
 );
 
 /**
@@ -620,7 +620,7 @@ export function Accordion({
     loading,
   });
 
-  const { base } = accordion();
+  const {base} = accordion();
   const renderProps = {
     ...AccordionProps.componentProps,
     ...props,
@@ -653,7 +653,7 @@ export function Accordion({
           {
             ...renderProps,
             className: renderProps.className,
-          }
+          },
         )
       ) : (
         <View {...renderProps}>{children}</View>
@@ -678,7 +678,7 @@ export function AccordionItem({
   baseClassName,
   ...props
 }: AccordionItemComponentProps) {
-  const { base } = accordionItem();
+  const {base} = accordionItem();
   const accordionContext = useContext(AccordionContext);
 
   if (!accordionContext) {
@@ -750,8 +750,8 @@ export function AccordionTrigger({
   reanimatedProps,
   ...props
 }: AccordionTriggerProps) {
-  const { base, content, indicatorIcon } = accordionTrigger();
-  const { colorScheme } = useContext(ThemeContext);
+  const {base, content, indicatorIcon} = accordionTrigger();
+  const currentTheme = useTheme();
   const itemState = useContext(AccordionItemContext);
   const rotation = useSharedValue(0);
 
@@ -764,22 +764,22 @@ export function AccordionTrigger({
 
   const animatedIndicatorIconStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ rotate: `${rotation.value}deg` }],
+      transform: [{rotate: `${rotation.value}deg`}],
     };
   });
 
   const Indicator = () => (
-    <View className={indicatorIcon({ className: indicatorIconClassName })}>
+    <View className={indicatorIcon({className: indicatorIconClassName})}>
       {typeof indicator === "function" ? (
         indicator(itemState?.state.isExpanded ?? false)
       ) : itemState?.props.loading ? (
-        <ActivityIndicator color={themes[colorScheme]["--foreground"]} />
+        <ActivityIndicator color={currentTheme.foreground} />
       ) : (
         <Reanimated.View
           style={animatedIndicatorIconStyle}
           {...reanimatedProps}
         >
-          <ChevronDownIcon />
+          <ChevronDownIcon color={currentTheme.foreground} />
         </Reanimated.View>
       )}
     </View>
@@ -797,7 +797,7 @@ export function AccordionTrigger({
 
   return asChild ? (
     <View {...baseProps}>
-      <View className={content({ className: contentClassName })}>
+      <View className={content({className: contentClassName})}>
         {React.cloneElement(
           React.Children.toArray(children)[0] as React.ReactElement<{
             className: string;
@@ -805,14 +805,14 @@ export function AccordionTrigger({
           {
             ...itemState?.triggerProps,
             ...props,
-          }
+          },
         )}
       </View>
       <Indicator />
     </View>
   ) : (
     <Pressable {...itemState?.triggerProps} {...baseProps}>
-      <Text className={content({ className: contentClassName })}>
+      <Text className={content({className: contentClassName})}>
         {startContent && <View>{startContent}</View>}
         <Text {...props}>{children}</Text>
       </Text>
@@ -829,7 +829,7 @@ export function AccordionContent({
   textClassName,
   ...props
 }: AccordionContentProps) {
-  const { base, text } = accordionContent();
+  const {base, text} = accordionContent();
 
   const itemState = useContext(AccordionItemContext);
   const height = useSharedValue(0);
@@ -840,7 +840,7 @@ export function AccordionContent({
     if (hasInitialized && contentHeight > 0) {
       height.value = withTiming(
         itemState?.state.isExpanded ? contentHeight : 0,
-        { duration: 300, reduceMotion: ReduceMotion.System }
+        {duration: 300, reduceMotion: ReduceMotion.System},
       );
     }
   }, [itemState?.state.isExpanded, contentHeight, hasInitialized]);
@@ -853,7 +853,7 @@ export function AccordionContent({
   });
 
   const handleLayout = (event: LayoutChangeEvent) => {
-    const { height: measuredHeight } = event.nativeEvent.layout;
+    const {height: measuredHeight} = event.nativeEvent.layout;
     if (measuredHeight > 0 && !hasInitialized) {
       setContentHeight(measuredHeight);
       setHasInitialized(true);
@@ -868,7 +868,7 @@ export function AccordionContent({
         if (React.isValidElement(child)) {
           return React.cloneElement(child, {
             ...itemState?.contentProps,
-            className: base({ compact: itemState?.props.compact }),
+            className: base({compact: itemState?.props.compact}),
             ...props,
           });
         }
@@ -876,7 +876,7 @@ export function AccordionContent({
       })
     ) : (
       <View {...itemState?.contentProps}>
-        <Text {...props} className={text({ className: textClassName })}>
+        <Text {...props} className={text({className: textClassName})}>
           {children}
         </Text>
       </View>
@@ -885,7 +885,7 @@ export function AccordionContent({
   return (
     <>
       <View
-        style={{ position: "absolute", opacity: 0, zIndex: -1 }}
+        style={{position: "absolute", opacity: 0, zIndex: -1}}
         onLayout={handleLayout}
         className={base({
           compact: itemState?.props.compact,

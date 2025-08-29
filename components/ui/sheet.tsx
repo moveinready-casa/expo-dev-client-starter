@@ -1,10 +1,11 @@
-import { AriaButtonProps, useButton } from "@react-aria/button";
+import {useTheme} from "@/lib/utils/theme";
+import {AriaButtonProps, useButton} from "@react-aria/button";
 import {
   AriaDialogProps as AriaSheetProps,
   useDialog as useSheetAria,
 } from "@react-aria/dialog";
-import { useFocusRing } from "@react-aria/focus";
-import { XIcon } from "lucide-react-native";
+import {useFocusRing} from "@react-aria/focus";
+import {XIcon} from "lucide-react-native";
 import React, {
   ComponentProps,
   createContext,
@@ -34,8 +35,7 @@ import Reanimated, {
   SlideOutRight,
   SlideOutUp,
 } from "react-native-reanimated";
-import { tv } from "tailwind-variants";
-import { ThemeContext, themes } from "../theme";
+import {tv} from "tailwind-variants";
 
 /**
  * Base props for the root `Sheet` component, context, and hook.
@@ -84,10 +84,10 @@ export type SheetContentProps = {
   onCloseAutoFocus?: (e: React.FocusEvent<Element, Element>) => void;
   onEscapeKeyDown?: (e: React.KeyboardEvent<Element>) => void;
   onPointerDownOutside?: (
-    e: GestureResponderEvent | React.FocusEvent<Element, Element>
+    e: GestureResponderEvent | React.FocusEvent<Element, Element>,
   ) => void;
   onInteractOutside?: (
-    e: GestureResponderEvent | React.FocusEvent<Element, Element>
+    e: GestureResponderEvent | React.FocusEvent<Element, Element>,
   ) => void;
   forceMount?: boolean;
 } & Partial<SheetReturn> &
@@ -298,7 +298,7 @@ export const useSheetTrigger = ({
   }
 
   const ref = useRef<HTMLButtonElement>(null);
-  const { buttonProps } = useButton({ ...props, isDisabled: disabled }, ref);
+  const {buttonProps} = useButton({...props, isDisabled: disabled}, ref);
 
   return {
     componentProps: {
@@ -324,7 +324,6 @@ export const useSheetTrigger = ({
 export const useSheetContent = ({
   modal,
   state,
-  forceMount,
   onOpenAutoFocus,
   onCloseAutoFocus,
   onEscapeKeyDown,
@@ -335,13 +334,13 @@ export const useSheetContent = ({
   const sheetRef = useRef<View | HTMLDivElement>(null);
 
   const sheetAria = useSheetAria(
-    { ...(Platform.OS === "web" ? props : {}) },
-    Platform.OS === "web" ? sheetRef : { current: null }
+    {...(Platform.OS === "web" ? props : {})},
+    Platform.OS === "web" ? sheetRef : {current: null},
   );
 
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const { buttonProps } = useButton(props, buttonRef);
-  const { focusProps } = useFocusRing();
+  const {buttonProps} = useButton(props, buttonRef);
+  const {focusProps} = useFocusRing();
 
   if (!state) {
     throw new Error("useSheetContent must be used within a Sheet");
@@ -401,7 +400,7 @@ export const useSheetContent = ({
  * @see SheetComponentProps
  */
 export const SheetContext = createContext<
-  SheetReturn & { props: Partial<SheetComponentProps> }
+  SheetReturn & {props: Partial<SheetComponentProps>}
 >({
   state: {
     isOpen: false,
@@ -445,10 +444,10 @@ export const sheetContent = tv({
   },
   variants: {
     side: {
-      top: { base: "inset-x-0 top-0 border border-b w-full max-h-lg" },
-      bottom: { base: "inset-x-0 bottom-0 border border-t w-full max-h-lg" },
-      left: { base: "inset-y-0 left-0 border border-r h-full max-w-lg" },
-      right: { base: "inset-y-0 right-0 border border-l h-full max-w-lg" },
+      top: {base: "inset-x-0 top-0 border border-b w-full max-h-lg"},
+      bottom: {base: "inset-x-0 bottom-0 border border-t w-full max-h-lg"},
+      left: {base: "inset-y-0 left-0 border border-r h-full max-w-lg"},
+      right: {base: "inset-y-0 right-0 border border-l h-full max-w-lg"},
     },
   },
   defaultVariants: {
@@ -527,9 +526,9 @@ export function Sheet({
   open,
   ...props
 }: SheetComponentProps) {
-  const hookProps = useSheet({ ...props, forceMount, defaultOpen, open });
+  const hookProps = useSheet({...props, forceMount, defaultOpen, open});
   return (
-    <SheetContext.Provider value={{ ...hookProps, props }}>
+    <SheetContext.Provider value={{...hookProps, props}}>
       {children}
     </SheetContext.Provider>
   );
@@ -546,7 +545,7 @@ export function SheetTrigger({
   ...props
 }: SheetTriggerProps) {
   const state = useContext(SheetContext);
-  const { componentProps } = useSheetTrigger({ ...state, ...props });
+  const {componentProps} = useSheetTrigger({...state, ...props});
 
   return asChild ? (
     React.cloneElement(
@@ -555,7 +554,7 @@ export function SheetTrigger({
       }>,
       {
         ...(componentProps as ComponentProps<typeof Pressable>),
-      }
+      },
     )
   ) : (
     <Pressable {...(componentProps as ComponentProps<typeof Pressable>)}>
@@ -569,7 +568,7 @@ export function SheetTrigger({
  * @param param0 - Props to configure the behavior of the sheet portal. @see SheetPortalComponentProps
  * @returns Returns a `View` which wraps the sheet content.
  */
-export function SheetPortal({ children, ...props }: SheetPortalComponentProps) {
+export function SheetPortal({children, ...props}: SheetPortalComponentProps) {
   return <View {...props}>{children}</View>;
 }
 
@@ -583,7 +582,7 @@ export function SheetOverlay({
   baseClassName,
   ...props
 }: SheetOverlayComponentProps) {
-  const { state, overlayProps, props: sheetProps } = useContext(SheetContext);
+  const {state, overlayProps, props: sheetProps} = useContext(SheetContext);
 
   if (sheetProps.modal === false) {
     return;
@@ -599,7 +598,7 @@ export function SheetOverlay({
           className: sheetOverlay({
             className: baseClassName || props.className,
           }),
-        }
+        },
       )
     : state.isOpen && (
         <Reanimated.View entering={FadeIn} exiting={FadeOut}>
@@ -628,11 +627,11 @@ export function SheetContent({
   baseClassName,
   ...props
 }: SheetContentComponentProps) {
-  const { state } = useContext(SheetContext);
-  const contextProps = useSheetContent({ ...props, state, forceMount });
-  const { colorScheme } = useContext(ThemeContext);
+  const {state} = useContext(SheetContext);
+  const contextProps = useSheetContent({...props, state, forceMount});
+  const currentTheme = useTheme();
 
-  const { base, closeButton } = sheetContent({ side });
+  const {base, closeButton} = sheetContent({side});
 
   let entering;
   switch (side) {
@@ -683,20 +682,20 @@ export function SheetContent({
                 className: base({
                   className: baseClassName || props.className,
                 }),
-              }
+              },
             )
           ) : (
             <View
               {...props}
               {...contextProps.componentProps}
-              className={base({ className: baseClassName || props.className })}
+              className={base({className: baseClassName || props.className})}
               style={{
                 height: Dimensions.get("screen").height,
               }}
             >
               <View>{children}</View>
               <SheetClose className={closeButton()}>
-                <XIcon color={themes[colorScheme]["--foreground"]} />
+                <XIcon color={currentTheme.foreground} />
                 <Text className="sr-only">Close</Text>
               </SheetClose>
             </View>
@@ -717,7 +716,7 @@ export function SheetClose({
   baseClassName,
   ...props
 }: SheetCloseComponentProps) {
-  const { closeButtonProps } = useContext(SheetContentContext);
+  const {closeButtonProps} = useContext(SheetContentContext);
 
   return asChild ? (
     React.cloneElement(
@@ -728,7 +727,7 @@ export function SheetClose({
         ...(closeButtonProps as ComponentProps<typeof Pressable>),
         ...props,
         className: baseClassName || props.className,
-      }
+      },
     )
   ) : (
     <Pressable
@@ -754,7 +753,7 @@ export function SheetHeader({
   return (
     <View
       {...props}
-      className={sheetHeader({ className: baseClassName || props.className })}
+      className={sheetHeader({className: baseClassName || props.className})}
     >
       {children}
     </View>
@@ -772,7 +771,7 @@ export function SheetTitle({
   baseClassName,
   ...props
 }: SheetTitleComponentProps) {
-  const { titleProps } = useContext(SheetContentContext);
+  const {titleProps} = useContext(SheetContentContext);
 
   return asChild ? (
     React.cloneElement(
@@ -781,14 +780,14 @@ export function SheetTitle({
       }>,
       {
         ...(titleProps as ComponentProps<typeof Text>),
-        className: sheetTitle({ className: baseClassName || props.className }),
-      }
+        className: sheetTitle({className: baseClassName || props.className}),
+      },
     )
   ) : (
     <Text
       {...(titleProps as ComponentProps<typeof Text>)}
       {...props}
-      className={sheetTitle({ className: baseClassName || props.className })}
+      className={sheetTitle({className: baseClassName || props.className})}
     >
       {children}
     </Text>
@@ -808,7 +807,7 @@ export function SheetFooter({
   return (
     <View
       {...props}
-      className={sheetFooter({ className: baseClassName || props.className })}
+      className={sheetFooter({className: baseClassName || props.className})}
     >
       {children}
     </View>
@@ -835,7 +834,7 @@ export function SheetDescription({
         className: sheetDescription({
           className: baseClassName || props.className,
         }),
-      }
+      },
     )
   ) : (
     <Text
