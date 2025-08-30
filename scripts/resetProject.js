@@ -43,14 +43,14 @@ appItems.forEach((item) => {
   }
 });
 
-const resetPageContent = `import { View, Text } from "react-native";
+const resetPageContent = `import { SafeAreaView, Text } from "react-native";
 
 export default function ResetComplete() {
   return (
-    <View>
+    <SafeAreaView>
       <Text className="text-2xl font-bold text-foreground">Reset Complete</Text>
       <Text className="text-lg text-muted-foreground">The project has been successfully reset</Text>
-    </View>
+    </SafeAreaView>
   );
 }
 `;
@@ -61,3 +61,5 @@ console.log("📄 Created new index.tsx with reset complete message");
 console.log(
   "✅ Project reset complete - app directory cleaned and reset page created"
 );
+
+execSync("echo 'r'")
