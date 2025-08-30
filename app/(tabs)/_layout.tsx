@@ -1,9 +1,16 @@
+import { useTheme } from "@/lib/utils/theme";
 import { Tabs } from "expo-router";
 import { BookIcon, HomeIcon } from "lucide-react-native";
 
 export default function TabLayout() {
+  const theme = useTheme();
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: "blue" }}>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: "blue",
+        tabBarStyle: { backgroundColor: theme.background },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
