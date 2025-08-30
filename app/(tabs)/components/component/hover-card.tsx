@@ -4,7 +4,6 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import React from "react";
 import { View } from "react-native";
 
 export default function HoverCardPage() {

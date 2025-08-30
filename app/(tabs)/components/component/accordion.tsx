@@ -4,7 +4,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import React from "react";
 import { Text, View } from "react-native";
 
 export default function AccordionPage() {

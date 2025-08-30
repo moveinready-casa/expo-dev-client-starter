@@ -6,14 +6,14 @@ import {
 } from "@/components/ui/card";
 import components from "@/constants/components";
 import { Link } from "expo-router";
-import { ScrollView, Text } from "react-native";
+import { ScrollView } from "react-native";
 
 export default function Index() {
   return (
     <ScrollView>
       {components.map((component) => (
         <Card key={component.name} className="m-2" asChild>
-          <Link href={`/${component.name}`}>
+          <Link href={`/components/component/${component.name}`}>
             <CardHeader>
               <CardTitle>{component.name}</CardTitle>
               <CardDescription>{component.description}</CardDescription>

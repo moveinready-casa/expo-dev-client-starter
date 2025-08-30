@@ -1,5 +1,4 @@
 import { Slider } from "@/components/ui/slider";
-import React from "react";
 import { View } from "react-native";
 
 export default function SliderPage() {

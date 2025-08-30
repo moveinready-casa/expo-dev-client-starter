@@ -10,7 +10,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import React from "react";
 import { View } from "react-native";
 
 export default function AlertDialogPage() {

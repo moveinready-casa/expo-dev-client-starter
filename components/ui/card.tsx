@@ -313,7 +313,7 @@ export const cardDescription = tv({
  * Defines the layout and styling for the card action area with optional blur effect.
  */
 export const cardAction = tv({
-  base: "flex items-center justify-end",
+  base: "flex items-end w-full",
   variants: {
     blurred: {
       true: "opacity-90 blur",
@@ -345,7 +345,7 @@ export const cardContent = tv({
  * Defines the layout and styling for the card footer section with optional blur effect.
  */
 export const cardFooter = tv({
-  base: "flex items-center",
+  base: "flex items-center mt-auto w-full",
   variants: {
     blurred: {
       true: "opacity-90 blur",

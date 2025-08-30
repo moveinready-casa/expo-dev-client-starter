@@ -1,5 +1,4 @@
 import { Progress } from "@/components/ui/progress";
-import React from "react";
 import { View } from "react-native";
 
 export default function ProgressPage() {

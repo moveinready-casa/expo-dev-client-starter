@@ -11,13 +11,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import React from "react";
 import { Text, View } from "react-native";
 
 export default function SheetPage() {
   return (
     <View className="h-screen w-screen">
-      <Sheet >
+      <Sheet>
         <SheetTrigger asChild>
           <Button>Open sheet</Button>
         </SheetTrigger>

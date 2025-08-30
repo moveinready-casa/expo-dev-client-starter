@@ -3,7 +3,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import React from "react";
 import { Text, View } from "react-native";
 
 export default function CollapsiblePage() {

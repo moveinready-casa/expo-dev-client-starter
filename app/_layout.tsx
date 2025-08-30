@@ -32,6 +32,7 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           title: "Expo Starter",
+          headerShown: false,
           contentStyle: { backgroundColor: theme.background },
           headerTitleStyle: { color: theme.foreground },
           headerStyle: { backgroundColor: theme.background },

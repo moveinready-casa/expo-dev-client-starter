@@ -1,5 +1,4 @@
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import React from "react";
 import { Image, View } from "react-native";
 
 export default function AspectRatioPage() {

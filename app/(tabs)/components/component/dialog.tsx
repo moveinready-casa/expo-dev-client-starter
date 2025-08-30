@@ -11,7 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import React from "react";
 import { Text, View } from "react-native";
 
 export default function DialogPage() {

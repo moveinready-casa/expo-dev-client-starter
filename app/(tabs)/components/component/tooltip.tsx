@@ -13,9 +13,7 @@ export default function TooltipPage() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>Hover</TooltipTrigger>
-            <TooltipContent>
-              Add to library
-            </TooltipContent>
+            <TooltipContent>Add to library</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       ) : (

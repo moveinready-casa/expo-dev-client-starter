@@ -4,7 +4,6 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import React from "react";
 import { View } from "react-native";
 
 export default function InputOtpPage() {

@@ -1,5 +1,4 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import React from "react";
 import { Text } from "react-native";
 
 export default function RadioGroupPage() {

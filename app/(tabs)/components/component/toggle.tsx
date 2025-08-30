@@ -1,6 +1,5 @@
 import { Toggle } from "@/components/ui/toggle";
 import { ItalicIcon } from "lucide-react-native";
-import React from "react";
 import { View } from "react-native";
 
 export default function TogglePage() {
