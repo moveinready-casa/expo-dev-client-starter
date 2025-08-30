@@ -7,7 +7,12 @@ export function DELETE(request: Request) {
   const answer = getPrompt(
     "Are you sure you want to reset the project? (Y/n) enter "
   );
-  if (answer === "n") {
+
+  setTimeout(() => {
+    return Response.json({ error: "Reset cancelled" }, { status: 400 });
+  }, 30000);
+
+  if (answer !== "Y") {
     return Response.json({ error: "Reset cancelled" }, { status: 400 });
   }
   execSync("pnpm run reset-project", { stdio: "inherit" });

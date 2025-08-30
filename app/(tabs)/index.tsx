@@ -13,7 +13,10 @@ import { Alert, ScrollView, Text, View } from "react-native";
 
 export default function Index() {
   const resetProject = async () => {
-    Alert.alert("Reset Project", "Please confirm in the terminal");
+    Alert.alert(
+      "Reset Project",
+      "Please confirm in the terminal (you have 30 seconds)"
+    );
     const response = await fetch("/reset", {
       method: "DELETE",
     });
@@ -25,7 +28,10 @@ export default function Index() {
     }
   };
   const updateComponents = async () => {
-    Alert.alert("Update Components", "Please confirm in the terminal");
+    Alert.alert(
+      "Update Components",
+      "Please confirm in the terminal (you have 30 seconds)"
+    );
     const response = await fetch("/update", {
       method: "PUT",
     });
