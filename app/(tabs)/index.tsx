@@ -80,7 +80,7 @@ export default function Index() {
             <CardFooter>
               <CardAction>
                 <Button variant="destructive" onPress={() => resetProject()}>
-                  Reset Project
+                  Reset
                 </Button>
               </CardAction>
             </CardFooter>
@@ -98,7 +98,7 @@ export default function Index() {
                   variant="destructive"
                   onPress={() => updateComponents()}
                 >
-                  Update Project
+                  Update
                 </Button>
               </CardAction>
             </CardFooter>
