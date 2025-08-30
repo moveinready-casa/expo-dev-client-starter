@@ -24,9 +24,7 @@ export default function Index() {
       method: "DELETE",
     });
 
-    if (response.status === 200) {
-      reloadAppAsync();
-    } else if (response.status === 400) {
+    if (response.status === 400) {
       Alert.alert("Reset Project", "Reset cancelled");
     }
   };
@@ -39,9 +37,7 @@ export default function Index() {
       method: "PUT",
     });
 
-    if (response.status === 200) {
-      reloadAppAsync();
-    } else if (response.status === 400) {
+    if (response.status === 400) {
       Alert.alert("Update Components", "Update cancelled");
     }
   };
