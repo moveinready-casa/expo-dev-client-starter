@@ -20,7 +20,7 @@ export default function SheetPage() {
         <SheetTrigger asChild>
           <Button>Open sheet</Button>
         </SheetTrigger>
-        <SheetPortal>
+        <SheetPortal name="sheet">
           <SheetOverlay />
           <SheetContent side="right">
             <SheetHeader>

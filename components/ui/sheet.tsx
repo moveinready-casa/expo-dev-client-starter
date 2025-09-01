@@ -1,11 +1,12 @@
-import {useTheme} from "@/lib/utils/theme";
-import {AriaButtonProps, useButton} from "@react-aria/button";
+import { useTheme } from "@/lib/utils/theme";
+import { AriaButtonProps, useButton } from "@react-aria/button";
 import {
   AriaDialogProps as AriaSheetProps,
   useDialog as useSheetAria,
 } from "@react-aria/dialog";
-import {useFocusRing} from "@react-aria/focus";
-import {XIcon} from "lucide-react-native";
+import { useFocusRing } from "@react-aria/focus";
+import { Portal } from "@rn-primitives/portal";
+import { XIcon } from "lucide-react-native";
 import React, {
   ComponentProps,
   createContext,
@@ -14,6 +15,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   Dimensions,
   GestureResponderEvent,
@@ -35,7 +37,7 @@ import Reanimated, {
   SlideOutRight,
   SlideOutUp,
 } from "react-native-reanimated";
-import {tv} from "tailwind-variants";
+import { tv } from "tailwind-variants";
 
 /**
  * Base props for the root `Sheet` component, context, and hook.
@@ -84,10 +86,10 @@ export type SheetContentProps = {
   onCloseAutoFocus?: (e: React.FocusEvent<Element, Element>) => void;
   onEscapeKeyDown?: (e: React.KeyboardEvent<Element>) => void;
   onPointerDownOutside?: (
-    e: GestureResponderEvent | React.FocusEvent<Element, Element>,
+    e: GestureResponderEvent | React.FocusEvent<Element, Element>
   ) => void;
   onInteractOutside?: (
-    e: GestureResponderEvent | React.FocusEvent<Element, Element>,
+    e: GestureResponderEvent | React.FocusEvent<Element, Element>
   ) => void;
   forceMount?: boolean;
 } & Partial<SheetReturn> &
@@ -225,7 +227,7 @@ export type SheetCloseComponentProps = {
  */
 export type SheetPortalComponentProps = {
   children: React.ReactNode;
-} & ComponentProps<typeof View>;
+} & ComponentProps<typeof Portal>;
 
 /**
  * Props for the `SheetOverlay` component.
@@ -298,7 +300,7 @@ export const useSheetTrigger = ({
   }
 
   const ref = useRef<HTMLButtonElement>(null);
-  const {buttonProps} = useButton({...props, isDisabled: disabled}, ref);
+  const { buttonProps } = useButton({ ...props, isDisabled: disabled }, ref);
 
   return {
     componentProps: {
@@ -334,13 +336,13 @@ export const useSheetContent = ({
   const sheetRef = useRef<View | HTMLDivElement>(null);
 
   const sheetAria = useSheetAria(
-    {...(Platform.OS === "web" ? props : {})},
-    Platform.OS === "web" ? sheetRef : {current: null},
+    { ...(Platform.OS === "web" ? props : {}) },
+    Platform.OS === "web" ? sheetRef : { current: null }
   );
 
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const {buttonProps} = useButton(props, buttonRef);
-  const {focusProps} = useFocusRing();
+  const { buttonProps } = useButton(props, buttonRef);
+  const { focusProps } = useFocusRing();
 
   if (!state) {
     throw new Error("useSheetContent must be used within a Sheet");
@@ -400,7 +402,7 @@ export const useSheetContent = ({
  * @see SheetComponentProps
  */
 export const SheetContext = createContext<
-  SheetReturn & {props: Partial<SheetComponentProps>}
+  SheetReturn & { props: Partial<SheetComponentProps> }
 >({
   state: {
     isOpen: false,
@@ -444,10 +446,10 @@ export const sheetContent = tv({
   },
   variants: {
     side: {
-      top: {base: "inset-x-0 top-0 border border-b w-full max-h-lg"},
-      bottom: {base: "inset-x-0 bottom-0 border border-t w-full max-h-lg"},
-      left: {base: "inset-y-0 left-0 border border-r h-full max-w-lg"},
-      right: {base: "inset-y-0 right-0 border border-l h-full max-w-lg"},
+      top: { base: "inset-x-0 top-0 border border-b w-full max-h-lg" },
+      bottom: { base: "inset-x-0 bottom-0 border border-t w-full max-h-lg" },
+      left: { base: "inset-y-0 left-0 border border-r h-full max-w-lg" },
+      right: { base: "inset-y-0 right-0 border border-l h-full max-w-lg" },
     },
   },
   defaultVariants: {
@@ -493,27 +495,30 @@ export const sheetDescription = tv({
  * ```tsx
  * <Sheet>
  *   <SheetTrigger>Open Sheet</SheetTrigger>
- *   <SheetContent>
- *     <SheetHeader>
- *       <SheetTitle>Edit Profile</SheetTitle>
- *       <SheetDescription>
- *         Make changes to your profile here. Click save when you're done.
- *       </SheetDescription>
- *     </SheetHeader>
- *     <View className="grid gap-4 py-4">
- *       <View className="grid grid-cols-4 items-center gap-4">
- *         <Text className="text-right">Name</Text>
- *         <Text className="col-span-3">John Doe</Text>
+ *   <SheetPortal name="sheet">
+ *     <SheetOverlay />
+ *     <SheetContent>
+ *       <SheetHeader>
+ *         <SheetTitle>Edit Profile</SheetTitle>
+ *         <SheetDescription>
+ *           Make changes to your profile here. Click save when you're done.
+ *         </SheetDescription>
+ *       </SheetHeader>
+ *       <View className="grid gap-4 py-4">
+ *         <View className="grid grid-cols-4 items-center gap-4">
+ *           <Text className="text-right">Name</Text>
+ *           <Text className="col-span-3">John Doe</Text>
+ *         </View>
+ *         <View className="grid grid-cols-4 items-center gap-4">
+ *           <Text className="text-right">Username</Text>
+ *           <Text className="col-span-3">@johndoe</Text>
+ *         </View>
  *       </View>
- *       <View className="grid grid-cols-4 items-center gap-4">
- *         <Text className="text-right">Username</Text>
- *         <Text className="col-span-3">@johndoe</Text>
- *       </View>
- *     </View>
- *     <SheetFooter>
- *       <SheetClose>Save changes</SheetClose>
- *     </SheetFooter>
- *   </SheetContent>
+ *       <SheetFooter>
+ *         <SheetClose>Save changes</SheetClose>
+ *       </SheetFooter>
+ *     </SheetContent>
+ *   </SheetPortal>
  * </Sheet>
  * ```
  * @param param0 - Props to configure the behavior of the sheet. @see SheetComponentProps
@@ -526,9 +531,9 @@ export function Sheet({
   open,
   ...props
 }: SheetComponentProps) {
-  const hookProps = useSheet({...props, forceMount, defaultOpen, open});
+  const hookProps = useSheet({ ...props, forceMount, defaultOpen, open });
   return (
-    <SheetContext.Provider value={{...hookProps, props}}>
+    <SheetContext.Provider value={{ ...hookProps, props }}>
       {children}
     </SheetContext.Provider>
   );
@@ -545,7 +550,7 @@ export function SheetTrigger({
   ...props
 }: SheetTriggerProps) {
   const state = useContext(SheetContext);
-  const {componentProps} = useSheetTrigger({...state, ...props});
+  const { componentProps } = useSheetTrigger({ ...state, ...props });
 
   return asChild ? (
     React.cloneElement(
@@ -554,7 +559,7 @@ export function SheetTrigger({
       }>,
       {
         ...(componentProps as ComponentProps<typeof Pressable>),
-      },
+      }
     )
   ) : (
     <Pressable {...(componentProps as ComponentProps<typeof Pressable>)}>
@@ -564,12 +569,33 @@ export function SheetTrigger({
 }
 
 /**
- * The sheet portal component. The portal is not used in this library as there is no body element in React Native, it is only here for compatibility with the Radix UI and Shadcn UI and can be removed if not used.
+ * The sheet portal component.
  * @param param0 - Props to configure the behavior of the sheet portal. @see SheetPortalComponentProps
  * @returns Returns a `View` which wraps the sheet content.
  */
-export function SheetPortal({children, ...props}: SheetPortalComponentProps) {
-  return <View {...props}>{children}</View>;
+export function SheetPortal({ children, ...props }: SheetPortalComponentProps) {
+  const context = useContext(SheetContext);
+  if (!context.state.isOpen) {
+    return;
+  }
+
+  return Platform.OS === "web" ? (
+    createPortal(
+      <SheetContext.Provider value={context}>
+        <div {...props} className="absolute inset-0 h-full w-full">
+          {children}
+        </div>
+      </SheetContext.Provider>,
+      // @ts-expect-error - Document is only used on web
+      document.body
+    )
+  ) : (
+    <Portal {...props}>
+      <SheetContext.Provider value={context}>
+        <View className="absolute inset-0 h-full w-full">{children}</View>
+      </SheetContext.Provider>
+    </Portal>
+  );
 }
 
 /**
@@ -582,7 +608,7 @@ export function SheetOverlay({
   baseClassName,
   ...props
 }: SheetOverlayComponentProps) {
-  const {state, overlayProps, props: sheetProps} = useContext(SheetContext);
+  const { state, overlayProps, props: sheetProps } = useContext(SheetContext);
 
   if (sheetProps.modal === false) {
     return;
@@ -598,7 +624,7 @@ export function SheetOverlay({
           className: sheetOverlay({
             className: baseClassName || props.className,
           }),
-        },
+        }
       )
     : state.isOpen && (
         <Reanimated.View entering={FadeIn} exiting={FadeOut}>
@@ -627,11 +653,11 @@ export function SheetContent({
   baseClassName,
   ...props
 }: SheetContentComponentProps) {
-  const {state} = useContext(SheetContext);
-  const contextProps = useSheetContent({...props, state, forceMount});
+  const { state } = useContext(SheetContext);
+  const contextProps = useSheetContent({ ...props, state, forceMount });
   const currentTheme = useTheme();
 
-  const {base, closeButton} = sheetContent({side});
+  const { base, closeButton } = sheetContent({ side });
 
   let entering;
   switch (side) {
@@ -682,13 +708,13 @@ export function SheetContent({
                 className: base({
                   className: baseClassName || props.className,
                 }),
-              },
+              }
             )
           ) : (
             <View
               {...props}
               {...contextProps.componentProps}
-              className={base({className: baseClassName || props.className})}
+              className={base({ className: baseClassName || props.className })}
               style={{
                 height: Dimensions.get("screen").height,
               }}
@@ -716,7 +742,7 @@ export function SheetClose({
   baseClassName,
   ...props
 }: SheetCloseComponentProps) {
-  const {closeButtonProps} = useContext(SheetContentContext);
+  const { closeButtonProps } = useContext(SheetContentContext);
 
   return asChild ? (
     React.cloneElement(
@@ -727,7 +753,7 @@ export function SheetClose({
         ...(closeButtonProps as ComponentProps<typeof Pressable>),
         ...props,
         className: baseClassName || props.className,
-      },
+      }
     )
   ) : (
     <Pressable
@@ -753,7 +779,7 @@ export function SheetHeader({
   return (
     <View
       {...props}
-      className={sheetHeader({className: baseClassName || props.className})}
+      className={sheetHeader({ className: baseClassName || props.className })}
     >
       {children}
     </View>
@@ -771,7 +797,7 @@ export function SheetTitle({
   baseClassName,
   ...props
 }: SheetTitleComponentProps) {
-  const {titleProps} = useContext(SheetContentContext);
+  const { titleProps } = useContext(SheetContentContext);
 
   return asChild ? (
     React.cloneElement(
@@ -780,14 +806,14 @@ export function SheetTitle({
       }>,
       {
         ...(titleProps as ComponentProps<typeof Text>),
-        className: sheetTitle({className: baseClassName || props.className}),
-      },
+        className: sheetTitle({ className: baseClassName || props.className }),
+      }
     )
   ) : (
     <Text
       {...(titleProps as ComponentProps<typeof Text>)}
       {...props}
-      className={sheetTitle({className: baseClassName || props.className})}
+      className={sheetTitle({ className: baseClassName || props.className })}
     >
       {children}
     </Text>
@@ -807,7 +833,7 @@ export function SheetFooter({
   return (
     <View
       {...props}
-      className={sheetFooter({className: baseClassName || props.className})}
+      className={sheetFooter({ className: baseClassName || props.className })}
     >
       {children}
     </View>
@@ -834,7 +860,7 @@ export function SheetDescription({
         className: sheetDescription({
           className: baseClassName || props.className,
         }),
-      },
+      }
     )
   ) : (
     <Text

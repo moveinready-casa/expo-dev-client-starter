@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useTheme } from "@/lib/utils/theme";
-import { reloadAppAsync } from "expo";
 import { Link, Stack } from "expo-router";
 import { Alert, ScrollView, Text, View } from "react-native";
 

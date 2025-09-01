@@ -1,8 +1,12 @@
-import {useTheme} from "@/lib/utils/theme";
-import {AriaButtonProps, useButton} from "@react-aria/button";
-import {AriaDialogProps, useDialog as useDialogAria} from "@react-aria/dialog";
-import {useFocusRing} from "@react-aria/focus";
-import {XIcon} from "lucide-react-native";
+import { useTheme } from "@/lib/utils/theme";
+import { AriaButtonProps, useButton } from "@react-aria/button";
+import {
+  AriaDialogProps,
+  useDialog as useDialogAria,
+} from "@react-aria/dialog";
+import { useFocusRing } from "@react-aria/focus";
+import { Portal } from "@rn-primitives/portal";
+import { XIcon } from "lucide-react-native";
 import React, {
   ComponentProps,
   createContext,
@@ -11,6 +15,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   Dimensions,
   GestureResponderEvent,
@@ -20,8 +25,8 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import Reanimated, {FadeIn, FadeOut} from "react-native-reanimated";
-import {tv} from "tailwind-variants";
+import Reanimated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { tv } from "tailwind-variants";
 
 /**
  * Base props for the root `Dialog` component, context, and hook.
@@ -70,10 +75,10 @@ export type DialogContentProps = {
   onCloseAutoFocus?: (e: React.FocusEvent<Element, Element>) => void;
   onEscapeKeyDown?: (e: React.KeyboardEvent<Element>) => void;
   onPointerDownOutside?: (
-    e: GestureResponderEvent | React.FocusEvent<Element, Element>,
+    e: GestureResponderEvent | React.FocusEvent<Element, Element>
   ) => void;
   onInteractOutside?: (
-    e: GestureResponderEvent | React.FocusEvent<Element, Element>,
+    e: GestureResponderEvent | React.FocusEvent<Element, Element>
   ) => void;
   forceMount?: boolean;
 } & Partial<DialogReturn> &
@@ -211,7 +216,7 @@ export type DialogCloseComponentProps = {
  */
 export type DialogPortalComponentProps = {
   children: React.ReactNode;
-} & ComponentProps<typeof View>;
+} & ComponentProps<typeof Portal>;
 
 /**
  * Props for the `DialogOverlay` component.
@@ -284,7 +289,7 @@ export const useDialogTrigger = ({
   }
 
   const ref = useRef<HTMLButtonElement>(null);
-  const {buttonProps} = useButton({...props, isDisabled: disabled}, ref);
+  const { buttonProps } = useButton({ ...props, isDisabled: disabled }, ref);
 
   return {
     componentProps: {
@@ -320,13 +325,13 @@ export const useDialogContent = ({
   const dialogRef = useRef<View | HTMLDivElement>(null);
 
   const dialogAria = useDialogAria(
-    {...(Platform.OS === "web" ? props : {})},
-    Platform.OS === "web" ? dialogRef : {current: null},
+    { ...(Platform.OS === "web" ? props : {}) },
+    Platform.OS === "web" ? dialogRef : { current: null }
   );
 
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const {buttonProps} = useButton(props, buttonRef);
-  const {focusProps} = useFocusRing();
+  const { buttonProps } = useButton(props, buttonRef);
+  const { focusProps } = useFocusRing();
 
   if (!state) {
     throw new Error("useDialogContent must be used within a Dialog");
@@ -386,7 +391,7 @@ export const useDialogContent = ({
  * @see DialogComponentProps
  */
 export const DialogContext = createContext<
-  DialogReturn & {props: Partial<DialogComponentProps>}
+  DialogReturn & { props: Partial<DialogComponentProps> }
 >({
   state: {
     isOpen: false,
@@ -430,11 +435,11 @@ export const dialogContent = tv({
   },
   variants: {
     borderRadius: {
-      none: {base: "rounded-none"},
-      sm: {base: "rounded-sm"},
-      md: {base: "rounded-md"},
-      lg: {base: "rounded-lg"},
-      xl: {base: "rounded-xl"},
+      none: { base: "rounded-none" },
+      sm: { base: "rounded-sm" },
+      md: { base: "rounded-md" },
+      lg: { base: "rounded-lg" },
+      xl: { base: "rounded-xl" },
     },
   },
 });
@@ -510,9 +515,9 @@ export function Dialog({
   open,
   ...props
 }: DialogComponentProps) {
-  const hookProps = useDialog({...props, forceMount, defaultOpen, open});
+  const hookProps = useDialog({ ...props, forceMount, defaultOpen, open });
   return (
-    <DialogContext.Provider value={{...hookProps, props}}>
+    <DialogContext.Provider value={{ ...hookProps, props }}>
       {children}
     </DialogContext.Provider>
   );
@@ -529,7 +534,7 @@ export function DialogTrigger({
   ...props
 }: DialogTriggerProps) {
   const state = useContext(DialogContext);
-  const {componentProps} = useDialogTrigger({...state, ...props});
+  const { componentProps } = useDialogTrigger({ ...state, ...props });
 
   return asChild ? (
     React.cloneElement(
@@ -538,7 +543,7 @@ export function DialogTrigger({
       }>,
       {
         ...(componentProps as ComponentProps<typeof Pressable>),
-      },
+      }
     )
   ) : (
     <Pressable {...(componentProps as ComponentProps<typeof Pressable>)}>
@@ -548,12 +553,35 @@ export function DialogTrigger({
 }
 
 /**
- * The dialog portal component. The portal is not used in this library as there is no body element in React Native, it is only here for compatibility with the Radix UI and Shadcn UI and can be removed if not used.
+ * The dialog portal component.
  * @param param0 - Props to configure the behavior of the dialog portal. @see DialogPortalComponentProps
  * @returns Returns a `View` which wraps the dialog content.
  */
-export function DialogPortal({children, ...props}: DialogPortalComponentProps) {
-  return <View {...props}>{children}</View>;
+export function DialogPortal({
+  children,
+  ...props
+}: DialogPortalComponentProps) {
+  const context = useContext(DialogContext);
+  if (!context.state.isOpen) {
+    return;
+  }
+  return Platform.OS === "web" ? (
+    createPortal(
+      <DialogContext.Provider value={context}>
+        <div {...props} className="absolute inset-0 h-full w-full">
+          {children}
+        </div>
+      </DialogContext.Provider>,
+      // @ts-expect-error - Document is only used on web
+      document.body
+    )
+  ) : (
+    <Portal {...props}>
+      <DialogContext.Provider value={context}>
+        <View className="absolute inset-0 h-full w-full">{children}</View>
+      </DialogContext.Provider>
+    </Portal>
+  );
 }
 
 /**
@@ -566,7 +594,7 @@ export function DialogOverlay({
   baseClassName,
   ...props
 }: DialogOverlayComponentProps) {
-  const {state, overlayProps, props: dialogProps} = useContext(DialogContext);
+  const { state, overlayProps, props: dialogProps } = useContext(DialogContext);
 
   if (dialogProps.modal === false) {
     return;
@@ -582,7 +610,7 @@ export function DialogOverlay({
           className: dialogOverlay({
             className: baseClassName || props.className,
           }),
-        },
+        }
       )
     : state.isOpen && (
         <Reanimated.View entering={FadeIn} exiting={FadeOut}>
@@ -611,11 +639,11 @@ export function DialogContent({
   baseClassName,
   ...props
 }: DialogContentComponentProps) {
-  const {state} = useContext(DialogContext);
-  const contextProps = useDialogContent({...props, state, forceMount});
+  const { state } = useContext(DialogContext);
+  const contextProps = useDialogContent({ ...props, state, forceMount });
   const currentTheme = useTheme();
 
-  const {base, closeButton} = dialogContent({borderRadius});
+  const { base, closeButton } = dialogContent({ borderRadius });
 
   const renderProps = {
     ...contextProps.componentProps,
@@ -626,7 +654,7 @@ export function DialogContent({
             top: Dimensions.get("window").height / 4,
           }
         : {},
-    className: base({className: baseClassName || props.className}),
+    className: base({ className: baseClassName || props.className }),
   };
 
   return (
@@ -637,12 +665,12 @@ export function DialogContent({
             React.Children.toArray(children)[0] as React.ReactElement<{
               className: string;
             }>,
-            renderProps,
+            renderProps
           )
         ) : (
           <View
             {...renderProps}
-            className={base({className: baseClassName || props.className})}
+            className={base({ className: baseClassName || props.className })}
           >
             <View>{children}</View>
             <DialogClose className={closeButton()}>
@@ -666,7 +694,7 @@ export function DialogClose({
   baseClassName,
   ...props
 }: DialogCloseComponentProps) {
-  const {closeButtonProps} = useContext(DialogContentContext);
+  const { closeButtonProps } = useContext(DialogContentContext);
 
   return asChild ? (
     React.cloneElement(
@@ -677,7 +705,7 @@ export function DialogClose({
         ...(closeButtonProps as ComponentProps<typeof Pressable>),
         ...props,
         className: baseClassName || props.className,
-      },
+      }
     )
   ) : (
     <Pressable
@@ -703,7 +731,7 @@ export function DialogHeader({
   return (
     <View
       {...props}
-      className={dialogHeader({className: baseClassName || props.className})}
+      className={dialogHeader({ className: baseClassName || props.className })}
     >
       {children}
     </View>
@@ -721,7 +749,7 @@ export function DialogTitle({
   baseClassName,
   ...props
 }: DialogTitleComponentProps) {
-  const {titleProps} = useContext(DialogContentContext);
+  const { titleProps } = useContext(DialogContentContext);
 
   return asChild ? (
     React.cloneElement(
@@ -730,14 +758,14 @@ export function DialogTitle({
       }>,
       {
         ...(titleProps as ComponentProps<typeof Text>),
-        className: dialogTitle({className: baseClassName || props.className}),
-      },
+        className: dialogTitle({ className: baseClassName || props.className }),
+      }
     )
   ) : (
     <Text
       {...(titleProps as ComponentProps<typeof Text>)}
       {...props}
-      className={dialogTitle({className: baseClassName || props.className})}
+      className={dialogTitle({ className: baseClassName || props.className })}
     >
       {children}
     </Text>
@@ -757,7 +785,7 @@ export function DialogFooter({
   return (
     <View
       {...props}
-      className={dialogFooter({className: baseClassName || props.className})}
+      className={dialogFooter({ className: baseClassName || props.className })}
     >
       {children}
     </View>
@@ -784,7 +812,7 @@ export function DialogDescription({
         className: dialogDescription({
           className: baseClassName || props.className,
         }),
-      },
+      }
     )
   ) : (
     <Text
