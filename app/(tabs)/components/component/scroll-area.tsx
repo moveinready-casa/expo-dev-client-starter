@@ -7,7 +7,7 @@ export default function ScrollAreaPage() {
       <ScrollArea baseClassName="h-48 w-72">
         {Array.from({ length: 30 }).map((_, i) => (
           <View key={i} className="p-2 border-b border-border">
-            <Text>Row {i + 1}</Text>
+            <Text className="text-foreground">Row {i + 1}</Text>
           </View>
         ))}
       </ScrollArea>

@@ -10,10 +10,10 @@ export default function CollapsiblePage() {
     <View className="m-auto">
       <Collapsible>
         <CollapsibleTrigger>
-          <Text>Can I use this in my project?</Text>
+          <Text className="text-foreground">Can I use this in my project?</Text>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <Text>
+          <Text className="text-foreground">
             Yes. Free to use for personal and commercial projects. No
             attribution required.
           </Text>
